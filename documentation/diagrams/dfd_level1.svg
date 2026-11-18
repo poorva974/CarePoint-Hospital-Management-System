@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 780" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <defs>
+    <style>
+      .title { font-size: 20px; font-weight: bold; fill: #0f172a; text-anchor: middle; }
+      .subtitle { font-size: 13px; fill: #64748b; text-anchor: middle; }
+      .actor-rect { fill: #f8fafc; stroke: #1e293b; stroke-width: 2; rx: 6; }
+      .process-rect { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; rx: 16; }
+      .datastore-box { fill: #f8fafc; stroke: #0f172a; stroke-width: 1.5; }
+      .text-actor { font-size: 13px; font-weight: bold; fill: #0f172a; text-anchor: middle; }
+      .text-process-num { font-size: 12px; font-weight: bold; fill: #2563eb; text-anchor: middle; }
+      .text-process-name { font-size: 13px; font-weight: bold; fill: #1e293b; text-anchor: middle; }
+      .text-ds-id { font-size: 12px; font-weight: bold; fill: #b45309; }
+      .text-ds-name { font-size: 12px; fill: #334155; }
+      .flow { stroke: #64748b; stroke-width: 1.5; fill: none; }
+      .flow-lbl { font-size: 10px; fill: #475569; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#64748b" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="500" y="35" class="title">Data Flow Diagram (Level 1) — Decomposed Processes</text>
+  <text x="500" y="55" class="subtitle">CarePoint Core Management Modules &amp; MySQL Data Store Interactions</text>
+
+  <!-- Actor: Hospital Staff / Administrator -->
+  <g transform="translate(40, 320)">
+    <rect width="130" height="130" class="actor-rect" />
+    <text x="65" y="55" class="text-actor">Hospital Staff</text>
+    <text x="65" y="75" class="text-actor">&amp; Doctors</text>
+    <text x="65" y="100" style="font-size: 10px; fill: #64748b; text-anchor: middle;">(Authenticated)</text>
+  </g>
+
+  <!-- Process 1.0: Patient Management -->
+  <g transform="translate(320, 80)">
+    <rect width="210" height="70" class="process-rect" />
+    <text x="105" y="28" class="text-process-num">1.0</text>
+    <text x="105" y="50" class="text-process-name">Patient Management</text>
+  </g>
+  <!-- Data Store D1: patient -->
+  <g transform="translate(720, 80)">
+    <line x1="0" y1="0" x2="180" y2="0" stroke="#0f172a" stroke-width="2" />
+    <line x1="0" y1="50" x2="180" y2="50" stroke="#0f172a" stroke-width="2" />
+    <rect width="180" height="50" fill="#f8fafc" opacity="0.6" />
+    <text x="15" y="30" class="text-ds-id">D1</text>
+    <text x="45" y="30" class="text-ds-name">patient (Table)</text>
+  </g>
+
+  <!-- Process 2.0: Doctor Directory -->
+  <g transform="translate(320, 200)">
+    <rect width="210" height="70" class="process-rect" />
+    <text x="105" y="28" class="text-process-num">2.0</text>
+    <text x="105" y="50" class="text-process-name">Doctor Directory</text>
+  </g>
+  <!-- Data Store D2: doctor -->
+  <g transform="translate(720, 200)">
+    <line x1="0" y1="0" x2="180" y2="0" stroke="#0f172a" stroke-width="2" />
+    <line x1="0" y1="50" x2="180" y2="50" stroke="#0f172a" stroke-width="2" />
+    <rect width="180" height="50" fill="#f8fafc" opacity="0.6" />
+    <text x="15" y="30" class="text-ds-id">D2</text>
+    <text x="45" y="30" class="text-ds-name">doctor (Table)</text>
+  </g>
+
+  <!-- Process 3.0: Appointment Scheduling -->
+  <g transform="translate(320, 320)">
+    <rect width="210" height="70" class="process-rect" />
+    <text x="105" y="28" class="text-process-num">3.0</text>
+    <text x="105" y="50" class="text-process-name">Appointment Scheduling</text>
+  </g>
+  <!-- Data Store D3: appointment -->
+  <g transform="translate(720, 320)">
+    <line x1="0" y1="0" x2="180" y2="0" stroke="#0f172a" stroke-width="2" />
+    <line x1="0" y1="50" x2="180" y2="50" stroke="#0f172a" stroke-width="2" />
+    <rect width="180" height="50" fill="#f8fafc" opacity="0.6" />
+    <text x="15" y="30" class="text-ds-id">D3</text>
+    <text x="45" y="30" class="text-ds-name">appointment (Table)</text>
+  </g>
+
+  <!-- Process 4.0: Medical Records -->
+  <g transform="translate(320, 440)">
+    <rect width="210" height="70" class="process-rect" />
+    <text x="105" y="28" class="text-process-num">4.0</text>
+    <text x="105" y="50" class="text-process-name">Medical Records EMR</text>
+  </g>
+  <!-- Data Store D4: medical_record -->
+  <g transform="translate(720, 440)">
+    <line x1="0" y1="0" x2="180" y2="0" stroke="#0f172a" stroke-width="2" />
+    <line x1="0" y1="50" x2="180" y2="50" stroke="#0f172a" stroke-width="2" />
+    <rect width="180" height="50" fill="#f8fafc" opacity="0.6" />
+    <text x="15" y="30" class="text-ds-id">D4</text>
+    <text x="45" y="30" class="text-ds-name">medical_record (Table)</text>
+  </g>
+
+  <!-- Process 5.0: Billing & Invoices -->
+  <g transform="translate(320, 560)">
+    <rect width="210" height="70" class="process-rect" />
+    <text x="105" y="28" class="text-process-num">5.0</text>
+    <text x="105" y="50" class="text-process-name">Billing &amp; Revenue</text>
+  </g>
+  <!-- Data Store D5: billing -->
+  <g transform="translate(720, 560)">
+    <line x1="0" y1="0" x2="180" y2="0" stroke="#0f172a" stroke-width="2" />
+    <line x1="0" y1="50" x2="180" y2="50" stroke="#0f172a" stroke-width="2" />
+    <rect width="180" height="50" fill="#f8fafc" opacity="0.6" />
+    <text x="15" y="30" class="text-ds-id">D5</text>
+    <text x="45" y="30" class="text-ds-name">billing (Table)</text>
+  </g>
+
+  <!-- FLOWS: Actor to Processes -->
+  <path d="M 170 340 L 320 115" class="flow" marker-end="url(#arrow)" />
+  <path d="M 170 360 L 320 235" class="flow" marker-end="url(#arrow)" />
+  <path d="M 170 385 L 320 355" class="flow" marker-end="url(#arrow)" />
+  <path d="M 170 410 L 320 475" class="flow" marker-end="url(#arrow)" />
+  <path d="M 170 430 L 320 595" class="flow" marker-end="url(#arrow)" />
+
+  <!-- FLOWS: Processes to Data Stores (Two-way) -->
+  <path d="M 530 110 L 720 110" class="flow" marker-end="url(#arrow)" />
+  <path d="M 720 120 L 530 120" class="flow" marker-end="url(#arrow)" />
+
+  <path d="M 530 230 L 720 230" class="flow" marker-end="url(#arrow)" />
+  <path d="M 720 240 L 530 240" class="flow" marker-end="url(#arrow)" />
+
+  <path d="M 530 350 L 720 350" class="flow" marker-end="url(#arrow)" />
+  <path d="M 720 360 L 530 360" class="flow" marker-end="url(#arrow)" />
+
+  <path d="M 530 470 L 720 470" class="flow" marker-end="url(#arrow)" />
+  <path d="M 720 480 L 530 480" class="flow" marker-end="url(#arrow)" />
+
+  <path d="M 530 590 L 720 590" class="flow" marker-end="url(#arrow)" />
+  <path d="M 720 600 L 530 600" class="flow" marker-end="url(#arrow)" />
+
+  <!-- Cross-store relationships in Level 1 -->
+  <!-- Appointment checks patient & doctor -->
+  <path d="M 425 320 L 425 270" class="flow" stroke-dasharray="3,3" marker-end="url(#arrow)" />
+  <path d="M 400 320 L 400 150" class="flow" stroke-dasharray="3,3" marker-end="url(#arrow)" />
+  <text x="340" y="295" class="flow-lbl">verify doctor</text>
+  <text x="330" y="180" class="flow-lbl">verify patient</text>
+
+  <!-- Medical records checks appointment -->
+  <path d="M 425 440 L 425 390" class="flow" stroke-dasharray="3,3" marker-end="url(#arrow)" />
+  <text x="430" y="420" class="flow-lbl">validate appointment</text>
+
+  <!-- Billing checks appointment & patient -->
+  <path d="M 425 560 L 425 510" class="flow" stroke-dasharray="3,3" marker-end="url(#arrow)" />
+  <text x="430" y="540" class="flow-lbl">verify appointment</text>
+
+  <!-- Explanatory note -->
+  <g transform="translate(60, 680)">
+    <rect width="880" height="50" fill="#f8fafc" stroke="#e2e8f0" rx="6" />
+    <text x="440" y="25" style="font-size: 11px; fill: #475569; text-anchor: middle;">
+      Level 1 DFD delineates the five decomposed sub-processes, validating entity referential relationships prior to writing to MySQL tables.
+    </text>
+    <text x="440" y="40" style="font-size: 11px; fill: #64748b; text-anchor: middle;">
+      Dashed lines denote inter-process relational verification checks required by foreign key constraints.
+    </text>
+  </g>
+</svg>
+

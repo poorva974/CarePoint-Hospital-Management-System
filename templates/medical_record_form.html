@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Clinical Record' if record else 'New Clinical Medical Record' }} - CarePoint{% endblock %}
+{% block page_title %}{{ 'Edit Record #' ~ record.record_id if record else 'Create Medical Record' }}{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('medical_records_list') }}" style="color: inherit; text-decoration: none;">Medical Records</a> &rsaquo; {{ 'Edit' if record else 'New' }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 840px; margin: 0 auto;">
+    <div class="card-header">
+        <span class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            {{ 'Edit Clinical Documentation' if record else 'Clinical Consultation & Diagnosis Entry' }}
+        </span>
+        <a href="{{ url_for('medical_records_list') }}" class="btn btn-secondary btn-sm">&larr; Back to Records</a>
+    </div>
+
+    <div class="card-body">
+        <form method="POST" action="">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-grid">
+                <!-- Patient Dropdown -->
+                <div class="form-group">
+                    <label class="form-label" for="med_patient_id">Select Patient <span class="required">*</span></label>
+                    <select id="med_patient_id" name="patient_id" class="form-control" required>
+                        <option value="">-- Choose Patient --</option>
+                        {% for p in patients %}
+                            {% set sel_patient = form_data.patient_id if form_data else (record.patient_id if record else preselect_patient_id) %}
+                            <option value="{{ p.patient_id }}" {% if sel_patient|string == p.patient_id|string %}selected{% endif %}>
+                                {{ p.name }} (ID: #{{ p.patient_id }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Doctor Dropdown -->
+                <div class="form-group">
+                    <label class="form-label" for="med_doctor_id">Attending Doctor <span class="required">*</span></label>
+                    <select id="med_doctor_id" name="doctor_id" class="form-control" required>
+                        <option value="">-- Choose Doctor --</option>
+                        {% for d in doctors %}
+                            {% set sel_doctor = form_data.doctor_id if form_data else (record.doctor_id if record else preselect_doctor_id) %}
+                            <option value="{{ d.doctor_id }}" {% if sel_doctor|string == d.doctor_id|string %}selected{% endif %}>
+                                {{ d.name }} ({{ d.specialization or 'General' }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Appointment Dropdown -->
+                <div class="form-group">
+                    <label class="form-label" for="med_appointment_id">Linked Appointment <span class="required">*</span></label>
+                    <select id="med_appointment_id" name="appointment_id" class="form-control" required>
+                        <option value="">-- Choose Consultation Appointment --</option>
+                        {% for a in appointments %}
+                            {% set sel_appt = form_data.appointment_id if form_data else (record.appointment_id if record else preselect_appointment_id) %}
+                            <option value="{{ a.appointment_id }}" 
+                                    data-patient="{{ a.patient_id }}" 
+                                    data-doctor="{{ a.doctor_id }}" 
+                                    {% if sel_appt|string == a.appointment_id|string %}selected{% endif %}>
+                                Appt #{{ a.appointment_id }} - {{ a.patient_name }} with {{ a.doctor_name }} ({{ a.appointment_date }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <span class="form-hint">Must belong to the selected patient and doctor</span>
+                </div>
+
+                <!-- Record Date -->
+                <div class="form-group">
+                    <label class="form-label" for="record_date">Record Date <span class="required">*</span></label>
+                    <input type="date" id="record_date" name="record_date" class="form-control" required value="{{ form_data.record_date if form_data else (record.record_date if record else current_date) }}">
+                </div>
+
+                <!-- Diagnosis -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="diagnosis">Diagnosis <span class="required">*</span></label>
+                    <textarea id="diagnosis" name="diagnosis" class="form-control" placeholder="Clinical evaluation and diagnosis findings..." required>{{ form_data.diagnosis if form_data else (record.diagnosis if record else '') }}</textarea>
+                </div>
+
+                <!-- Prescription -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="prescription">Prescription & Medication</label>
+                    <textarea id="prescription" name="prescription" class="form-control" placeholder="Medications, dosages, frequency, and instructions...">{{ form_data.prescription if form_data else (record.prescription if record else '') }}</textarea>
+                </div>
+
+                <!-- Report / Lab Findings -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="report">Clinical Examination / Lab Report</label>
+                    <textarea id="report" name="report" class="form-control" placeholder="Test results, vital signs, physical exam observations...">{{ form_data.report if form_data else (record.report if record else '') }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    {{ 'Update Medical Record' if record else 'Save Medical Record' }}
+                </button>
+                <a href="{{ url_for('medical_records_list') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

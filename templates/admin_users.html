@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block page_title %}User Account Management{% endblock %}
+{% block breadcrumb %}Administration &rsaquo; User Accounts{% endblock %}
+
+{% block content %}
+<div class="content-header-row" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 0.25rem;">User Accounts & Role Governance</h2>
+        <p style="color: #64748b; font-size: 0.9rem;">Inspect registered users across all roles, manage permissions, and maintain account status.</p>
+    </div>
+    <div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+            &larr; Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- KPI Summary Cards -->
+<div class="kpi-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+    <div class="card kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">Total Users</span>
+            <div class="kpi-icon" style="background-color: #f1f5f9; color: #475569;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+        </div>
+        <div class="kpi-value">{{ total_users }}</div>
+        <span class="kpi-subtext">Registered in database</span>
+    </div>
+
+    <div class="card kpi-card" style="border-left: 4px solid #10b981;">
+        <div class="kpi-header">
+            <span class="kpi-title">Patients</span>
+            <div class="kpi-icon" style="background-color: #dcfce7; color: #16a34a;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            </div>
+        </div>
+        <div class="kpi-value" style="color: #16a34a;">{{ patient_count }}</div>
+        <span class="kpi-subtext">Registered patient accounts</span>
+    </div>
+
+    <div class="card kpi-card" style="border-left: 4px solid #0284c7;">
+        <div class="kpi-header">
+            <span class="kpi-title">Doctors</span>
+            <div class="kpi-icon" style="background-color: #e0f2fe; color: #0284c7;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"></path><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"></path><circle cx="20" cy="10" r="2"></circle></svg>
+            </div>
+        </div>
+        <div class="kpi-value" style="color: #0284c7;">{{ doctor_count }}</div>
+        <span class="kpi-subtext">Physicians & consultants</span>
+    </div>
+
+    <div class="card kpi-card" style="border-left: 4px solid #8b5cf6;">
+        <div class="kpi-header">
+            <span class="kpi-title">Staff & Admins</span>
+            <div class="kpi-icon" style="background-color: #f5f3ff; color: #8b5cf6;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+        </div>
+        <div class="kpi-value" style="color: #8b5cf6;">{{ staff_count + admin_count }}</div>
+        <span class="kpi-subtext">{{ admin_count }} Admin{% if admin_count != 1 %}s{% endif %}, {{ staff_count }} Staff</span>
+    </div>
+</div>
+
+<!-- Users List Card -->
+<div class="card">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0;">User Accounts Directory</h3>
+        <span style="font-size: 0.85rem; color: #64748b;">Showing {{ users|length }} accounts</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>User / Name</th>
+                    <th>Email Address</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Registered</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div class="avatar" style="width: 34px; height: 34px; font-size: 0.82rem; background: {% if u.role == 'Administrator' %}#0284c7{% elif u.role == 'Doctor' %}#059669{% elif u.role == 'Patient' %}#d97706{% else %}#64748b{% endif %}; color: #ffffff;">
+                                {{ (u.name[:2]).upper() }}
+                            </div>
+                            <div>
+                                <strong style="color: #0f172a; display: block; font-size: 0.92rem;">{{ u.name }}</strong>
+                                {% if u.user_id == session.get('user_id') %}
+                                    <span style="font-size: 0.72rem; color: #0284c7; font-weight: 700;">(Current Session)</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span style="font-family: monospace; font-size: 0.88rem; color: #334155;">{{ u.email }}</span>
+                    </td>
+                    <td>
+                        <span style="font-size: 0.85rem; color: #475569;">{{ u.phone or '—' }}</span>
+                    </td>
+                    <td>
+                        {% if u.role == 'Administrator' %}
+                            <span class="badge" style="background-color: #e0f2fe; color: #0284c7; font-weight: 700;">
+                                Administrator
+                            </span>
+                        {% elif u.role == 'Doctor' %}
+                            <span class="badge" style="background-color: #ecfdf5; color: #059669; font-weight: 700;">
+                                Doctor
+                            </span>
+                        {% elif u.role == 'Patient' %}
+                            <span class="badge" style="background-color: #fef3c7; color: #d97706; font-weight: 700;">
+                                Patient
+                            </span>
+                        {% else %}
+                            <span class="badge" style="background-color: #f1f5f9; color: #475569; font-weight: 600;">
+                                Staff
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if u.status == 'Disabled' %}
+                            <span class="badge badge-danger">Disabled</span>
+                        {% else %}
+                            <span class="badge badge-success">Active</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span style="font-size: 0.85rem; color: #64748b;">
+                            {{ u.created_at.strftime('%d %b %Y') if u.created_at else 'N/A' }}
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <div style="display: inline-flex; gap: 0.4rem; align-items: center; justify-content: flex-end;">
+                            {% if u.user_id != session.get('user_id') %}
+                                <!-- Role Selector Form -->
+                                <form method="POST" action="{{ url_for('admin_update_user_role', user_id=u.user_id) }}" style="display: inline-flex; align-items: center; gap: 4px;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <select name="role" class="form-control" style="padding: 2px 6px; font-size: 0.78rem; height: auto;" onchange="this.form.submit()">
+                                        <option value="Patient" {% if u.role == 'Patient' %}selected{% endif %}>Patient</option>
+                                        <option value="Doctor" {% if u.role == 'Doctor' %}selected{% endif %}>Doctor</option>
+                                        <option value="Staff" {% if u.role == 'Staff' %}selected{% endif %}>Staff</option>
+                                        <option value="Administrator" {% if u.role == 'Administrator' %}selected{% endif %}>Admin</option>
+                                    </select>
+                                </form>
+
+                                <!-- Status Toggle Button -->
+                                {% if u.status == 'Disabled' %}
+                                    <form method="POST" action="{{ url_for('admin_update_user_status', user_id=u.user_id) }}" style="display: inline;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="status" value="Approved">
+                                        <button type="submit" class="btn btn-secondary btn-sm" style="color: #16a34a; border-color: #bbf7d0; padding: 3px 8px; font-size: 0.75rem;">
+                                            Activate
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form method="POST" action="{{ url_for('admin_update_user_status', user_id=u.user_id) }}" style="display: inline;" onsubmit="return confirm('Deactivate access for {{ u.name }}?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="status" value="Disabled">
+                                        <button type="submit" class="btn btn-secondary btn-sm" style="color: #dc2626; border-color: #fecaca; padding: 3px 8px; font-size: 0.75rem;">
+                                            Disable
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                                <!-- Delete Button -->
+                                <form method="POST" action="{{ url_for('admin_delete_user', user_id=u.user_id) }}" style="display: inline;" onsubmit="return confirm('Permanently remove {{ u.name }} from the system?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-secondary btn-sm" style="color: #ef4444; border-color: #fee2e2; padding: 3px 7px; font-size: 0.75rem;" title="Delete User">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span style="font-size: 0.78rem; color: #94a3b8; font-style: italic;">Active Session</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

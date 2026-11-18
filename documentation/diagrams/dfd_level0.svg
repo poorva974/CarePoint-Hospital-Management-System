@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <defs>
+    <style>
+      .title { font-size: 20px; font-weight: bold; fill: #0f172a; text-anchor: middle; }
+      .subtitle { font-size: 13px; fill: #64748b; text-anchor: middle; }
+      .entity-rect { fill: #f8fafc; stroke: #334155; stroke-width: 2; rx: 6; }
+      .entity-text { font-size: 14px; font-weight: bold; fill: #0f172a; text-anchor: middle; }
+      .process-circle { fill: #eff6ff; stroke: #2563eb; stroke-width: 2.5; }
+      .process-text { font-size: 15px; font-weight: bold; fill: #1e40af; text-anchor: middle; }
+      .datastore-line { stroke: #0f172a; stroke-width: 2.5; }
+      .flow-line { stroke: #475569; stroke-width: 1.5; fill: none; }
+      .flow-label { font-size: 11px; fill: #1e293b; font-weight: 500; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="450" y="40" class="title">Data Flow Diagram (Level 0) — Context Diagram</text>
+  <text x="450" y="62" class="subtitle">CarePoint Hospital Management System (HMS)</text>
+
+  <!-- External Entity: Hospital Staff / Admin -->
+  <g transform="translate(60, 180)">
+    <rect width="180" height="110" class="entity-rect" />
+    <text x="90" y="45" class="entity-text">Hospital Staff /</text>
+    <text x="90" y="68" class="entity-text">Administrator</text>
+    <text x="90" y="90" style="font-size: 11px; fill: #64748b; text-anchor: middle;">(Authorized User)</text>
+  </g>
+
+  <!-- Central Process: 0.0 CarePoint HMS -->
+  <g transform="translate(450, 235)">
+    <circle r="95" class="process-circle" />
+    <text x="0" y="-30" class="process-text" style="font-size: 13px; fill: #3b82f6;">0.0</text>
+    <text x="0" y="-5" class="process-text">CarePoint</text>
+    <text x="0" y="18" class="process-text">Hospital Management</text>
+    <text x="0" y="40" class="process-text">System</text>
+  </g>
+
+  <!-- External Entity: MySQL Database -->
+  <g transform="translate(680, 180)">
+    <line x1="0" y1="0" x2="160" y2="0" class="datastore-line" />
+    <line x1="0" y1="110" x2="160" y2="110" class="datastore-line" />
+    <rect width="160" height="110" fill="#f8fafc" opacity="0.5" />
+    <text x="80" y="45" class="entity-text">MySQL Database</text>
+    <text x="80" y="68" class="entity-text">hospital_management</text>
+    <text x="80" y="90" style="font-size: 11px; fill: #64748b; text-anchor: middle;">(5 Relational Tables)</text>
+  </g>
+
+  <!-- Flow: Staff to System (Inputs) -->
+  <path d="M 240 215 L 355 215" class="flow-line" marker-end="url(#arrow)" />
+  <text x="245" y="205" class="flow-label">Login Credentials,</text>
+  <text x="245" y="228" class="flow-label">Patient Demographics,</text>
+  <text x="245" y="242" class="flow-label">Appointments, Bills</text>
+
+  <!-- Flow: System to Staff (Outputs) -->
+  <path d="M 355 265 L 240 265" class="flow-line" marker-end="url(#arrow)" />
+  <text x="250" y="280" class="flow-label">Dashboard Metrics,</text>
+  <text x="250" y="295" class="flow-label">Clinical Charts, Receipts</text>
+
+  <!-- Flow: System to DB (SQL Queries) -->
+  <path d="M 545 215 L 680 215" class="flow-line" marker-end="url(#arrow)" />
+  <text x="555" y="205" class="flow-label">SQL INSERT / UPDATE /</text>
+  <text x="555" y="228" class="flow-label">DELETE & Transactions</text>
+
+  <!-- Flow: DB to System (Data Results) -->
+  <path d="M 680 265 L 545 265" class="flow-line" marker-end="url(#arrow)" />
+  <text x="555" y="280" class="flow-label">Query Result Sets,</text>
+  <text x="555" y="295" class="flow-label">Aggregates & Records</text>
+
+  <!-- Notes -->
+  <g transform="translate(60, 420)">
+    <rect width="780" height="45" fill="#f8fafc" stroke="#e2e8f0" rx="6" />
+    <text x="390" y="28" style="font-size: 12px; fill: #475569; text-anchor: middle;">
+      Level 0 Context Diagram depicts the system boundary, external role actors, operational inputs/outputs, and data store interactions.
+    </text>
+  </g>
+</svg>
+

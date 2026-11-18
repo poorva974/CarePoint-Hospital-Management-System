@@ -1,0 +1,1148 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Management Dashboard - CarePoint{% endblock %}
+{% block page_title %}Hospital Management Dashboard{% endblock %}
+{% block breadcrumb %}CarePoint Hospital Administration Dashboard &bull; Visual Analytics & Clinical KPIs{% endblock %}
+
+{% block content %}
+<!-- Analytics Dashboard Header with Date Range Filter & Refresh -->
+<div class="dashboard-header-container">
+    <div class="dashboard-header-left">
+        <h2>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            Hospital Management Dashboard
+        </h2>
+        <p>Hospital Administration Dashboard &mdash; Real-time clinical analytics, patient flow, appointment trends, and revenue metrics.</p>
+    </div>
+
+    <div class="dashboard-header-right">
+        <!-- Current Date Pill -->
+        <div class="date-pill-badge" id="currentDateBadge" title="Server system date">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span id="displayTodayDate">{{ current_date }}</span>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="filter-controls-wrap">
+            <label for="dashboardRangeSelect" class="sr-only" style="display: none;">Select Date Range</label>
+            <select id="dashboardRangeSelect" class="dashboard-range-select" aria-label="Date Range Filter">
+                <option value="today">Today</option>
+                <option value="last_7_days">Last 7 Days</option>
+                <option value="last_30_days">Last 30 Days</option>
+                <option value="this_month" selected>This Month</option>
+                <option value="custom">Custom Range</option>
+            </select>
+
+            <!-- Custom Date Range Form (Hidden by default) -->
+            <div id="customRangeInputs" class="custom-range-inputs">
+                <input type="date" id="customStartDate" aria-label="Start Date">
+                <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">to</span>
+                <input type="date" id="customEndDate" aria-label="End Date">
+                <button type="button" id="applyCustomRangeBtn" class="btn btn-primary btn-sm" style="padding: 0.35rem 0.65rem; font-size: 0.8rem;">Apply</button>
+            </div>
+
+            <!-- Refresh Button -->
+            <button type="button" id="refreshDashboardBtn" class="btn-refresh" title="Refresh analytics data">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+                <span>Refresh</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Active Filter Label Banner -->
+<div id="activeRangeBadgeContainer" style="margin-top: -0.75rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+    <span style="font-size: 0.82rem; color: var(--text-muted);">
+        Active Filter: <strong id="activeRangeLabel" style="color: var(--primary);">This Month</strong>
+    </span>
+    <span id="dataTimestamp" style="font-size: 0.78rem; color: #94a3b8;">Live synchronized with MySQL</span>
+</div>
+
+<!-- Error Alert Banner (Hidden by default) -->
+<div id="analyticsErrorBanner" class="analytics-error-banner">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <span id="analyticsErrorMessage">Unable to refresh dashboard metrics. Please check database connection.</span>
+    </div>
+    <button type="button" id="retryAnalyticsBtn" class="btn btn-sm btn-secondary" style="border-color: #fca5a5; background: #ffffff;">Retry</button>
+</div>
+
+<!-- Quick Actions Row -->
+<div class="card" style="margin-bottom: 1.5rem; background: #ffffff;">
+    <div class="card-header" style="background: transparent;">
+        <span class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Quick Management Actions
+        </span>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Direct module shortcuts</span>
+    </div>
+    <div class="card-body" style="padding: 1.25rem;">
+        <div class="quick-actions-grid">
+            <a href="{{ url_for('appointment_add') }}" class="quick-action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
+                <span>Book Appointment</span>
+            </a>
+            <a href="{{ url_for('patient_add') }}" class="quick-action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="16" y1="11" x2="22" y2="11"></line></svg>
+                <span>Add Patient</span>
+            </a>
+            <a href="{{ url_for('doctor_add') }}" class="quick-action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="17" y1="11" x2="23" y2="11"></line></svg>
+                <span>Add Doctor</span>
+            </a>
+            <a href="{{ url_for('medical_record_add') }}" class="quick-action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                <span>Add Record</span>
+            </a>
+            <a href="{{ url_for('billing_add') }}" class="quick-action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line><line x1="12" y1="14" x2="12" y2="16"></line></svg>
+                <span>Generate Bill</span>
+            </a>
+            {% if session.get('user_role') == 'Administrator' %}
+            <a href="{{ url_for('admin_users') }}" class="quick-action-btn" style="border-color: #bae6fd; background-color: #f0f9ff;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#0284c7"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span style="color: #0284c7; font-weight: 700;">User Accounts</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- 1. Four Summary Statistics Cards -->
+<div class="stats-grid">
+    <!-- Card 1: Total Patients -->
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Total Patients</span>
+            <span class="stat-value" id="kpiTotalPatients">{{ stats.total_patients }}</span>
+            <span class="stat-subtext" id="kpiPatientsSubtext">Registered in database</span>
+        </div>
+        <div class="stat-icon stat-blue">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+    </div>
+
+    <!-- Card 2: Total Doctors -->
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Total Doctors</span>
+            <span class="stat-value" id="kpiTotalDoctors">{{ stats.total_doctors }}</span>
+            <span class="stat-subtext">Active Doctors across specialties</span>
+        </div>
+        <div class="stat-icon stat-purple">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        </div>
+    </div>
+
+    <!-- Card 3: Total Appointments -->
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Total Appointments</span>
+            <span class="stat-value" id="kpiTotalAppointments">{{ stats.total_appointments }}</span>
+            <span class="stat-subtext"><span id="kpiScheduledAppointments">{{ stats.scheduled_appointments }}</span> scheduled in period</span>
+        </div>
+        <div class="stat-icon stat-amber">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </div>
+    </div>
+
+    <!-- Card 4: Total Revenue (Collected Paid Amount) -->
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Collected Revenue</span>
+            <span class="stat-value" id="kpiTotalRevenue">₹{{ "{:,.2f}".format(stats.total_revenue) }}</span>
+            <span class="stat-subtext"><span id="kpiPendingRevenue">₹{{ "{:,.2f}".format(stats.pending_revenue) }}</span> pending collection</span>
+        </div>
+        <div class="stat-icon stat-green">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Visual Analytics Section: 2-Column Desktop Grid of 6 Interactive Charts -->
+<div class="charts-grid-2col">
+
+    <!-- Chart 1: Appointment Trends (LINE CHART) -->
+    <div class="chart-card" id="cardAppointmentTrends">
+        <div class="chart-loading-overlay" id="loadingAppointmentTrends">
+            <div class="chart-spinner"></div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Loading Trends...</span>
+        </div>
+        <div class="chart-card-header">
+            <div class="chart-card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--primary);">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                Appointment Trends
+            </div>
+            <span class="chart-card-badge" id="badgeAppointmentTrends">Line Chart</span>
+        </div>
+        <div class="chart-card-body">
+            <div class="chart-wrapper">
+                <canvas id="chartAppointmentTrends"></canvas>
+            </div>
+            <div class="chart-empty-state" id="emptyAppointmentTrends" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <h4>No Appointment Trends</h4>
+                <p>No appointments recorded within the selected date range.</p>
+            </div>
+        </div>
+        <div class="chart-footer-note">
+            Displays appointment booking volume over time, tracking scheduled vs completed consultations.
+        </div>
+    </div>
+
+    <!-- Chart 2: Appointment Status Distribution (DOUGHNUT CHART) -->
+    <div class="chart-card" id="cardAppointmentStatus">
+        <div class="chart-loading-overlay" id="loadingAppointmentStatus">
+            <div class="chart-spinner"></div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Loading Status...</span>
+        </div>
+        <div class="chart-card-header">
+            <div class="chart-card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #f59e0b;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 2a10 10 0 0 1 10 10h-10z"></path>
+                </svg>
+                Appointment Status
+            </div>
+            <span class="chart-card-badge" id="badgeAppointmentStatus" style="background: #fef3c7; color: #b45309;">Doughnut Chart</span>
+        </div>
+        <div class="chart-card-body">
+            <div class="chart-wrapper">
+                <canvas id="chartAppointmentStatus"></canvas>
+            </div>
+            <div class="chart-empty-state" id="emptyAppointmentStatus" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                <h4>No Status Data</h4>
+                <p>No appointments found in this date window to compute status breakdown.</p>
+            </div>
+        </div>
+        <div class="chart-footer-note">
+            Distribution of consultation statuses (Scheduled, Completed, Cancelled) with percentages.
+        </div>
+    </div>
+
+    <!-- Chart 3: Patient Registrations (BAR CHART) -->
+    <div class="chart-card" id="cardPatientRegistrations">
+        <div class="chart-loading-overlay" id="loadingPatientRegistrations">
+            <div class="chart-spinner"></div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Loading Registrations...</span>
+        </div>
+        <div class="chart-card-header">
+            <div class="chart-card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #0284c7;">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                </svg>
+                Patient Registrations
+            </div>
+            <span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">Monthly Bar Chart</span>
+        </div>
+        <div class="chart-card-body">
+            <div class="chart-wrapper">
+                <canvas id="chartPatientRegistrations"></canvas>
+            </div>
+            <div class="chart-empty-state" id="emptyPatientRegistrations" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                <h4>No Registration Records</h4>
+                <p>No patient registration timestamp records found in database.</p>
+            </div>
+        </div>
+        <div class="chart-footer-note">
+            Monthly patient registrations derived from relational <code>patient.created_at</code> timestamps.
+        </div>
+    </div>
+
+    <!-- Chart 4: Revenue Overview (LINE CHART) -->
+    <div class="chart-card" id="cardRevenueOverview">
+        <div class="chart-loading-overlay" id="loadingRevenueOverview">
+            <div class="chart-spinner"></div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Loading Revenue...</span>
+        </div>
+        <div class="chart-card-header">
+            <div class="chart-card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #10b981;">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                Revenue Overview
+            </div>
+            <span class="chart-card-badge" style="background: #dcfce7; color: #166534;">Revenue Trend</span>
+        </div>
+        <div class="chart-card-body">
+            <div class="chart-wrapper">
+                <canvas id="chartRevenueOverview"></canvas>
+            </div>
+            <div class="chart-empty-state" id="emptyRevenueOverview" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                <h4>No Billing Transactions</h4>
+                <p>No invoice or payment records match the selected date filter.</p>
+            </div>
+        </div>
+        <div class="chart-footer-note">
+            Actual collected revenue from paid bills (excluding unpaid balances) over time.
+        </div>
+    </div>
+
+    <!-- Chart 5: Appointments by Doctor (BAR CHART) -->
+    <div class="chart-card" id="cardDoctorAppointments">
+        <div class="chart-loading-overlay" id="loadingDoctorAppointments">
+            <div class="chart-spinner"></div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Loading Doctors...</span>
+        </div>
+        <div class="chart-card-header">
+            <div class="chart-card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #8b5cf6;">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <line x1="19" y1="8" x2="19" y2="14"></line>
+                    <line x1="22" y1="11" x2="16" y2="11"></line>
+                </svg>
+                Appointments by Doctor
+            </div>
+            <span class="chart-card-badge" style="background: #f3e8ff; color: #7e22ce;">Workload Bar</span>
+        </div>
+        <div class="chart-card-body">
+            <div class="chart-wrapper">
+                <canvas id="chartDoctorAppointments"></canvas>
+            </div>
+            <div class="chart-empty-state" id="emptyDoctorAppointments" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                <h4>No Doctor Workload Data</h4>
+                <p>No consultation records assigned to doctors in this period.</p>
+            </div>
+        </div>
+        <div class="chart-footer-note">
+            Doctor consultation volume, highlighting physicians with the highest appointment load.
+        </div>
+    </div>
+
+    <!-- Chart 6: Department-wise Appointments (BAR CHART) -->
+    <div class="chart-card" id="cardDepartmentAppointments">
+        <div class="chart-loading-overlay" id="loadingDepartmentAppointments">
+            <div class="chart-spinner"></div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Loading Departments...</span>
+        </div>
+        <div class="chart-card-header">
+            <div class="chart-card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #06b6d4;">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+                Department-wise Appointments
+            </div>
+            <span class="chart-card-badge" style="background: #cffafe; color: #0e7490;">Specialty Share</span>
+        </div>
+        <div class="chart-card-body">
+            <div class="chart-wrapper">
+                <canvas id="chartDepartmentAppointments"></canvas>
+            </div>
+            <div class="chart-empty-state" id="emptyDepartmentAppointments" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <h4>No Department Activity</h4>
+                <p>No departmental appointments recorded in selected period.</p>
+            </div>
+        </div>
+        <div class="chart-footer-note">
+            Consultations grouped by hospital clinical specialty (Cardiology, Neurology, Orthopedics, etc.).
+        </div>
+    </div>
+
+</div>
+
+<!-- 3. Recent Activity Section (Recent Appointments & Recent Patients) -->
+<div class="recent-activity-grid">
+
+    <!-- Recent Appointments Table (Relational SQL JOIN) -->
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header">
+            <span class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Recent Appointments
+            </span>
+            <a href="{{ url_for('appointments_list') }}" class="btn btn-secondary btn-sm">
+                View All Appointments &rarr;
+            </a>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            <div class="table-responsive">
+                <table class="table" id="dashboardRecentAppointmentsTable">
+                    <thead>
+                        <tr>
+                            <th>Appt ID</th>
+                            <th>Patient Name</th>
+                            <th>Doctor Name</th>
+                            <th>Date</th>
+                            <th>Time Slot</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentAppointmentsTbody">
+                        {% if recent_appointments %}
+                            {% for apt in recent_appointments %}
+                                <tr>
+                                    <td><strong>#{{ apt.appointment_id }}</strong></td>
+                                    <td>
+                                        <a href="{{ url_for('patient_detail', patient_id=apt.patient_id) }}" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                                            {{ apt.patient_name }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('doctor_detail', doctor_id=apt.doctor_id) }}" style="color: var(--text-dark); text-decoration: none;">
+                                            {{ apt.doctor_name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ apt.appointment_date }}</td>
+                                    <td>{{ apt.time_slot }}</td>
+                                    <td>
+                                        {% if apt.status == 'Scheduled' %}
+                                            <span class="badge badge-scheduled"><span class="badge-dot"></span>Scheduled</span>
+                                        {% elif apt.status == 'Completed' %}
+                                            <span class="badge badge-completed"><span class="badge-dot"></span>Completed</span>
+                                        {% elif apt.status == 'Cancelled' %}
+                                            <span class="badge badge-cancelled"><span class="badge-dot"></span>Cancelled</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">{{ apt.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <a href="{{ url_for('appointment_detail', appointment_id=apt.appointment_id) }}" class="btn btn-secondary btn-sm" title="View Details">
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                    No appointments currently on file.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Registered Patients Section -->
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header">
+            <span class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                Recent Patients
+            </span>
+            <a href="{{ url_for('patients_list') }}" class="btn btn-secondary btn-sm">
+                View All Patients &rarr;
+            </a>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            <div id="recentPatientsListContainer">
+                {% if recent_patients %}
+                    {% for p in recent_patients %}
+                        <div class="recent-patient-item">
+                            <div class="recent-patient-left">
+                                <div class="recent-patient-avatar">
+                                    {{ p.name[:2]|upper }}
+                                </div>
+                                <div class="recent-patient-info">
+                                    <h5>
+                                        <a href="{{ url_for('patient_detail', patient_id=p.patient_id) }}" style="color: var(--text-dark); text-decoration: none;">
+                                            {{ p.name }}
+                                        </a>
+                                        <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">#{{ p.patient_id }}</span>
+                                    </h5>
+                                    <p>
+                                        <span>Phone: {{ p.phone or 'N/A' }}</span>
+                                        {% if p.dob %} &bull; <span>DOB: {{ p.dob }}</span>{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <a href="{{ url_for('patient_detail', patient_id=p.patient_id) }}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">
+                                    Profile
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
+                        No patient records registered yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Local High-Performance Bundled Chart.js v4.4.2 -->
+<script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+
+<script>
+/**
+ * CarePoint Hospital Management System - Visual Analytics Engine
+ * Manages 6 Chart.js interactive charts, dynamic date filtering,
+ * asynchronous metrics refresh, loading states, and responsive resizing.
+ */
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Chart Instance Registry
+    const charts = {
+        appointmentTrends: null,
+        appointmentStatus: null,
+        patientRegistrations: null,
+        doctorAppointments: null,
+        departmentAppointments: null,
+        revenueOverview: null
+    };
+
+    // Color Palette Constants
+    const colors = {
+        primary: "rgba(37, 99, 235, 1)",
+        primaryAlpha: "rgba(37, 99, 235, 0.15)",
+        success: "rgba(16, 185, 129, 1)",
+        successAlpha: "rgba(16, 185, 129, 0.15)",
+        warning: "rgba(245, 158, 11, 1)",
+        warningAlpha: "rgba(245, 158, 11, 0.15)",
+        purple: "rgba(139, 92, 246, 1)",
+        purpleAlpha: "rgba(139, 92, 246, 0.15)",
+        cyan: "rgba(6, 182, 212, 1)",
+        cyanAlpha: "rgba(6, 182, 212, 0.15)",
+        danger: "rgba(239, 68, 68, 1)",
+        dangerAlpha: "rgba(239, 68, 68, 0.15)",
+        gridLines: "rgba(226, 232, 240, 0.7)",
+        statusPalette: [
+            "#3b82f6", // Scheduled
+            "#10b981", // Completed
+            "#ef4444", // Cancelled
+            "#f59e0b", // Other/Rescheduled
+            "#8b5cf6"
+        ],
+        deptPalette: [
+            "#2563eb", "#06b6d4", "#8b5cf6", "#10b981", "#f59e0b", "#ec4899"
+        ]
+    };
+
+    // DOM Elements
+    const rangeSelect = document.getElementById("dashboardRangeSelect");
+    const customRangeInputs = document.getElementById("customRangeInputs");
+    const customStartDate = document.getElementById("customStartDate");
+    const customEndDate = document.getElementById("customEndDate");
+    const applyCustomRangeBtn = document.getElementById("applyCustomRangeBtn");
+    const refreshBtn = document.getElementById("refreshDashboardBtn");
+    const activeRangeLabel = document.getElementById("activeRangeLabel");
+    const errorBanner = document.getElementById("analyticsErrorBanner");
+    const errorMessage = document.getElementById("analyticsErrorMessage");
+    const retryBtn = document.getElementById("retryAnalyticsBtn");
+
+    // KPI Elements
+    const kpiPatients = document.getElementById("kpiTotalPatients");
+    const kpiDoctors = document.getElementById("kpiTotalDoctors");
+    const kpiAppointments = document.getElementById("kpiTotalAppointments");
+    const kpiScheduled = document.getElementById("kpiScheduledAppointments");
+    const kpiRevenue = document.getElementById("kpiTotalRevenue");
+    const kpiPending = document.getElementById("kpiPendingRevenue");
+
+    // Overlays & Empty States
+    const overlays = {
+        appointmentTrends: document.getElementById("loadingAppointmentTrends"),
+        appointmentStatus: document.getElementById("loadingAppointmentStatus"),
+        patientRegistrations: document.getElementById("loadingPatientRegistrations"),
+        doctorAppointments: document.getElementById("loadingDoctorAppointments"),
+        departmentAppointments: document.getElementById("loadingDepartmentAppointments"),
+        revenueOverview: document.getElementById("loadingRevenueOverview")
+    };
+
+    const emptyStates = {
+        appointmentTrends: document.getElementById("emptyAppointmentTrends"),
+        appointmentStatus: document.getElementById("emptyAppointmentStatus"),
+        patientRegistrations: document.getElementById("emptyPatientRegistrations"),
+        doctorAppointments: document.getElementById("emptyDoctorAppointments"),
+        departmentAppointments: document.getElementById("emptyDepartmentAppointments"),
+        revenueOverview: document.getElementById("emptyRevenueOverview")
+    };
+
+    function showLoading(show) {
+        Object.values(overlays).forEach(el => {
+            if (el) el.classList.toggle("active", show);
+        });
+        if (refreshBtn) refreshBtn.classList.toggle("loading", show);
+    }
+
+    function toggleEmptyState(chartKey, isEmpty) {
+        const canvas = document.getElementById(`chart${chartKey.charAt(0).toUpperCase() + chartKey.slice(1)}`);
+        const emptyEl = emptyStates[chartKey];
+        if (canvas) canvas.style.display = isEmpty ? "none" : "block";
+        if (emptyEl) emptyEl.style.display = isEmpty ? "flex" : "none";
+    }
+
+    // Number & Currency Formatters
+    const formatCurrency = (num) => {
+        return "₹" + Number(num || 0).toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    };
+
+    const formatNumber = (num) => {
+        return Number(num || 0).toLocaleString("en-IN");
+    };
+
+    // 2. Chart Initialization Functions
+    function initAppointmentTrends(data) {
+        const ctx = document.getElementById("chartAppointmentTrends");
+        if (!ctx) return;
+
+        const hasData = data && data.labels && data.labels.length > 0;
+        toggleEmptyState("appointmentTrends", !hasData);
+
+        if (charts.appointmentTrends) {
+            charts.appointmentTrends.destroy();
+            charts.appointmentTrends = null;
+        }
+        if (!hasData) return;
+
+        charts.appointmentTrends = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: "Total Consultations",
+                        data: data.total,
+                        borderColor: colors.primary,
+                        backgroundColor: colors.primaryAlpha,
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        borderWidth: 2.5
+                    },
+                    {
+                        label: "Completed",
+                        data: data.completed,
+                        borderColor: colors.success,
+                        backgroundColor: "transparent",
+                        borderDash: [5, 5],
+                        tension: 0.35,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "top",
+                        labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: 600 } }
+                    },
+                    tooltip: {
+                        mode: "index",
+                        intersect: false,
+                        padding: 10,
+                        boxPadding: 4
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: colors.gridLines },
+                        ticks: { stepSize: 1, precision: 0 }
+                    }
+                }
+            }
+        });
+    }
+
+    function initAppointmentStatus(data) {
+        const ctx = document.getElementById("chartAppointmentStatus");
+        if (!ctx) return;
+
+        const hasData = data && data.labels && data.labels.length > 0;
+        toggleEmptyState("appointmentStatus", !hasData);
+
+        if (charts.appointmentStatus) {
+            charts.appointmentStatus.destroy();
+            charts.appointmentStatus = null;
+        }
+        if (!hasData) return;
+
+        charts.appointmentStatus = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.counts,
+                    backgroundColor: colors.statusPalette.slice(0, data.labels.length),
+                    borderColor: "#ffffff",
+                    borderWidth: 2.5,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "68%",
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: 600 },
+                            padding: 14
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const val = context.raw || 0;
+                                const pct = data.percentages ? data.percentages[context.dataIndex] : 0;
+                                return ` ${context.label}: ${val} (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function initPatientRegistrations(data) {
+        const ctx = document.getElementById("chartPatientRegistrations");
+        if (!ctx) return;
+
+        const hasData = data && data.labels && data.labels.length > 0;
+        toggleEmptyState("patientRegistrations", !hasData);
+
+        if (charts.patientRegistrations) {
+            charts.patientRegistrations.destroy();
+            charts.patientRegistrations = null;
+        }
+        if (!hasData) return;
+
+        charts.patientRegistrations = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: "New Patients Registered",
+                    data: data.counts,
+                    backgroundColor: colors.cyan,
+                    borderRadius: 6,
+                    maxBarThickness: 38
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { padding: 10 }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: colors.gridLines },
+                        ticks: { stepSize: 1, precision: 0 }
+                    }
+                }
+            }
+        });
+    }
+
+    function initRevenueOverview(data) {
+        const ctx = document.getElementById("chartRevenueOverview");
+        if (!ctx) return;
+
+        const hasData = data && data.labels && data.labels.length > 0;
+        toggleEmptyState("revenueOverview", !hasData);
+
+        if (charts.revenueOverview) {
+            charts.revenueOverview.destroy();
+            charts.revenueOverview = null;
+        }
+        if (!hasData) return;
+
+        charts.revenueOverview = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: "Collected Revenue (Paid)",
+                        data: data.collected,
+                        borderColor: colors.success,
+                        backgroundColor: colors.successAlpha,
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 4,
+                        borderWidth: 2.5
+                    },
+                    {
+                        label: "Pending Revenue",
+                        data: data.pending,
+                        borderColor: colors.warning,
+                        backgroundColor: "transparent",
+                        borderDash: [4, 4],
+                        tension: 0.35,
+                        pointRadius: 3,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "top",
+                        labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: 600 } }
+                    },
+                    tooltip: {
+                        mode: "index",
+                        intersect: false,
+                        padding: 10,
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.dataset.label}: ${formatCurrency(context.parsed.y)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: colors.gridLines },
+                        ticks: {
+                            callback: function(value) {
+                                return "₹" + value.toLocaleString("en-IN");
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function initDoctorAppointments(data) {
+        const ctx = document.getElementById("chartDoctorAppointments");
+        if (!ctx) return;
+
+        const hasData = data && data.labels && data.labels.length > 0;
+        toggleEmptyState("doctorAppointments", !hasData);
+
+        if (charts.doctorAppointments) {
+            charts.doctorAppointments.destroy();
+            charts.doctorAppointments = null;
+        }
+        if (!hasData) return;
+
+        // Generate bar colors: highlight doctor with highest load
+        const maxVal = Math.max(...data.counts);
+        const bgColors = data.counts.map(val => val === maxVal && val > 0 ? "rgba(139, 92, 246, 1)" : "rgba(196, 181, 253, 0.85)");
+
+        charts.doctorAppointments = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: "Appointments Booked",
+                    data: data.counts,
+                    backgroundColor: bgColors,
+                    borderRadius: 6,
+                    maxBarThickness: 34
+                }]
+            },
+            options: {
+                indexAxis: "y", // Horizontal bar chart for readable doctor names
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function(context) {
+                                const dept = data.departments ? data.departments[context.dataIndex] : "";
+                                return dept ? `Specialty: ${dept}` : "";
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: { color: colors.gridLines },
+                        ticks: { stepSize: 1, precision: 0 }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11, weight: 600 } }
+                    }
+                }
+            }
+        });
+    }
+
+    function initDepartmentAppointments(data) {
+        const ctx = document.getElementById("chartDepartmentAppointments");
+        if (!ctx) return;
+
+        const hasData = data && data.labels && data.labels.length > 0;
+        toggleEmptyState("departmentAppointments", !hasData);
+
+        if (charts.departmentAppointments) {
+            charts.departmentAppointments.destroy();
+            charts.departmentAppointments = null;
+        }
+        if (!hasData) return;
+
+        charts.departmentAppointments = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: "Consultations",
+                    data: data.counts,
+                    backgroundColor: colors.deptPalette.slice(0, data.labels.length),
+                    borderRadius: 6,
+                    maxBarThickness: 36
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { padding: 10 }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: colors.gridLines },
+                        ticks: { stepSize: 1, precision: 0 }
+                    }
+                }
+            }
+        });
+    }
+
+    // 3. Render Dynamic Tables
+    function renderRecentAppointments(appointments) {
+        const tbody = document.getElementById("recentAppointmentsTbody");
+        if (!tbody) return;
+
+        if (!appointments || appointments.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">No appointments recorded for this timeframe.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = appointments.map(apt => {
+            let badgeClass = "badge-secondary";
+            if (apt.status === "Scheduled") badgeClass = "badge-scheduled";
+            else if (apt.status === "Completed") badgeClass = "badge-completed";
+            else if (apt.status === "Cancelled") badgeClass = "badge-cancelled";
+
+            return `
+                <tr>
+                    <td><strong>#${apt.appointment_id}</strong></td>
+                    <td>
+                        <a href="/patients/${apt.patient_id}" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                            ${apt.patient_name || 'Patient #' + apt.patient_id}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/doctors/${apt.doctor_id}" style="color: var(--text-dark); text-decoration: none;">
+                            ${apt.doctor_name || 'Dr. #' + apt.doctor_id}
+                        </a>
+                    </td>
+                    <td>${apt.formatted_date || apt.appointment_date}</td>
+                    <td>${apt.time_slot}</td>
+                    <td><span class="badge ${badgeClass}"><span class="badge-dot"></span>${apt.status}</span></td>
+                    <td style="text-align: right;">
+                        <a href="/appointments/${apt.appointment_id}" class="btn btn-secondary btn-sm" title="View Details">View</a>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    function renderRecentPatients(patients) {
+        const container = document.getElementById("recentPatientsListContainer");
+        if (!container) return;
+
+        if (!patients || patients.length === 0) {
+            container.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.88rem;">No patient records available.</div>`;
+            return;
+        }
+
+        container.innerHTML = patients.map(p => {
+            const initials = p.name ? p.name.substring(0, 2).toUpperCase() : "PT";
+            return `
+                <div class="recent-patient-item">
+                    <div class="recent-patient-left">
+                        <div class="recent-patient-avatar">${initials}</div>
+                        <div class="recent-patient-info">
+                            <h5>
+                                <a href="/patients/${p.patient_id}" style="color: var(--text-dark); text-decoration: none;">
+                                    ${p.name}
+                                </a>
+                                <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">#${p.patient_id}</span>
+                            </h5>
+                            <p>
+                                <span>Phone: ${p.phone || 'N/A'}</span>
+                                ${p.dob ? ` &bull; <span>DOB: ${p.formatted_dob || p.dob}</span>` : ''}
+                            </p>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <a href="/patients/${p.patient_id}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">
+                            Profile
+                        </a>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    }
+
+    // 4. API Fetch & Dynamic Update Engine
+    async function loadAnalytics() {
+        showLoading(true);
+        if (errorBanner) errorBanner.classList.remove("active");
+
+        const range = rangeSelect ? rangeSelect.value : "this_month";
+        let url = `/api/dashboard/analytics?range=${encodeURIComponent(range)}`;
+
+        if (range === "custom") {
+            const startVal = customStartDate ? customStartDate.value : "";
+            const endVal = customEndDate ? customEndDate.value : "";
+            if (startVal) url += `&start_date=${encodeURIComponent(startVal)}`;
+            if (endVal) url += `&end_date=${encodeURIComponent(endVal)}`;
+        }
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error ${response.status}: Failed to retrieve analytics data`);
+            }
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || "Analytics calculation returned failure status");
+            }
+
+            // Update Active Filter Label
+            if (activeRangeLabel && data.range) {
+                activeRangeLabel.textContent = data.range.label;
+            }
+
+            // Update KPI Cards
+            if (data.stats) {
+                if (kpiPatients) kpiPatients.textContent = formatNumber(data.stats.total_patients);
+                if (kpiDoctors) kpiDoctors.textContent = formatNumber(data.stats.total_doctors);
+                if (kpiAppointments) kpiAppointments.textContent = formatNumber(data.stats.total_appointments);
+                if (kpiScheduled) kpiScheduled.textContent = formatNumber(data.stats.scheduled_appointments);
+                if (kpiRevenue) kpiRevenue.textContent = formatCurrency(data.stats.total_revenue);
+                if (kpiPending) kpiPending.textContent = formatCurrency(data.stats.pending_revenue);
+            }
+
+            // Initialize or Update All 6 Charts
+            initAppointmentTrends(data.appointment_trends);
+            initAppointmentStatus(data.appointment_status);
+            initPatientRegistrations(data.patient_registrations);
+            initRevenueOverview(data.revenue_trends);
+            initDoctorAppointments(data.doctor_appointments);
+            initDepartmentAppointments(data.department_appointments);
+
+            // Update Recent Tables
+            if (data.recent_appointments) renderRecentAppointments(data.recent_appointments);
+            if (data.recent_patients) renderRecentPatients(data.recent_patients);
+
+        } catch (err) {
+            console.error("Dashboard Analytics Error:", err);
+            if (errorBanner) {
+                if (errorMessage) errorMessage.textContent = err.message || "Failed to load dashboard metrics.";
+                errorBanner.classList.add("active");
+            }
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // 5. Event Listeners
+    if (rangeSelect) {
+        rangeSelect.addEventListener("change", () => {
+            if (rangeSelect.value === "custom") {
+                if (customRangeInputs) customRangeInputs.classList.add("active");
+                // Pre-fill sensible default custom bounds if empty
+                if (customStartDate && !customStartDate.value) {
+                    const d = new Date();
+                    d.setDate(1);
+                    customStartDate.value = d.toISOString().split("T")[0];
+                }
+                if (customEndDate && !customEndDate.value) {
+                    customEndDate.value = new Date().toISOString().split("T")[0];
+                }
+            } else {
+                if (customRangeInputs) customRangeInputs.classList.remove("active");
+                loadAnalytics();
+            }
+        });
+    }
+
+    if (applyCustomRangeBtn) {
+        applyCustomRangeBtn.addEventListener("click", () => {
+            loadAnalytics();
+        });
+    }
+
+    if (refreshBtn) {
+        refreshBtn.addEventListener("click", () => {
+            loadAnalytics();
+        });
+    }
+
+    if (retryBtn) {
+        retryBtn.addEventListener("click", () => {
+            loadAnalytics();
+        });
+    }
+
+    // 6. Initial Analytics Data Mount
+    loadAnalytics();
+});
+</script>
+{% endblock %}

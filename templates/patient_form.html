@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Patient' if patient else 'Add New Patient' }} - CarePoint{% endblock %}
+{% block page_title %}{{ 'Edit Patient' if patient else 'Register New Patient' }}{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('patients_list') }}" style="color: inherit; text-decoration: none;">Patients</a> &rsaquo; {{ 'Edit #' ~ patient.patient_id if patient else 'New' }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 760px; margin: 0 auto;">
+    <div class="card-header">
+        <span class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            {{ 'Edit Patient Profile' if patient else 'Patient Demographic Information' }}
+        </span>
+        <a href="{{ url_for('patients_list') }}" class="btn btn-secondary btn-sm">&larr; Back to Patients</a>
+    </div>
+
+    <div class="card-body">
+        <form method="POST" action="">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-grid">
+                <!-- Name -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="name">Full Name <span class="required">*</span></label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Aarav Sharma" required maxlength="100" value="{{ form_data.name if form_data else (patient.name if patient else '') }}">
+                    <span class="form-hint">Patient's full legal name as per government ID</span>
+                </div>
+
+                <!-- Gender -->
+                <div class="form-group">
+                    <label class="form-label" for="gender">Gender</label>
+                    <select id="gender" name="gender" class="form-control">
+                        <option value="">-- Select Gender --</option>
+                        {% set current_gender = form_data.gender if form_data else (patient.gender if patient else '') %}
+                        <option value="Male" {% if current_gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if current_gender == 'Female' %}selected{% endif %}>Female</option>
+                        <option value="Other" {% if current_gender == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+
+                <!-- DOB -->
+                <div class="form-group">
+                    <label class="form-label" for="dob">Date of Birth</label>
+                    <input type="date" id="dob" name="dob" class="form-control" value="{{ form_data.dob if form_data else (patient.dob if patient else '') }}">
+                    <span class="form-hint">Must be today or earlier</span>
+                </div>
+
+                <!-- Phone -->
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g. 9876500001" maxlength="15" value="{{ form_data.phone if form_data else (patient.phone if patient else '') }}">
+                    <span class="form-hint">Primary contact telephone number</span>
+                </div>
+
+                <!-- Address -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="address">Address</label>
+                    <textarea id="address" name="address" class="form-control" placeholder="e.g. Flat 302, Green Valley Apartments, Delhi" maxlength="255">{{ form_data.address if form_data else (patient.address if patient else '') }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    {{ 'Update Patient' if patient else 'Save Patient' }}
+                </button>
+                <a href="{{ url_for('patients_list') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

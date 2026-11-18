@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}400 - Bad Request - CarePoint{% endblock %}
+{% block page_title %}Bad Request (400){% endblock %}
+{% block breadcrumb %}Error &rsaquo; 400{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 3rem auto; text-align: center; padding: 2.5rem 1.5rem;">
+    <div style="width: 64px; height: 64px; border-radius: 50%; background-color: var(--danger-bg); color: var(--danger); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+    </div>
+    <h3 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-dark);">400 - Request Validation Failed</h3>
+    <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1.5rem;">
+        {{ error_message or "The request was invalid or the CSRF security token has expired. Please refresh the page and try submitting the form again." }}
+    </p>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Return to Dashboard</a>
+</div>
+{% endblock %}
+

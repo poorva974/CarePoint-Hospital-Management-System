@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Billing & Invoices - CarePoint{% endblock %}
+{% block page_title %}Billing & Revenue Management{% endblock %}
+{% block breadcrumb %}Patient Invoices & Accounts{% endblock %}
+
+{% block content %}
+<!-- Billing Summary KPI Metrics -->
+<div class="stats-grid" style="margin-bottom: 1.5rem;">
+    <!-- Paid Revenue -->
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Total Paid Revenue</span>
+            <span class="stat-value" style="color: var(--success-text);">₹{{ "{:,.2f}".format(revenue_stats.paid_revenue) }}</span>
+            <span class="stat-subtext">Collected and verified</span>
+        </div>
+        <div class="stat-icon stat-green">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </div>
+    </div>
+
+    <!-- Pending Revenue -->
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Pending Payments</span>
+            <span class="stat-value" style="color: var(--warning-text);">₹{{ "{:,.2f}".format(revenue_stats.pending_revenue) }}</span>
+            <span class="stat-subtext">Awaiting settlement</span>
+        </div>
+        <div class="stat-icon stat-amber">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+    </div>
+
+    <!-- Partially Paid -->
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Partially Paid</span>
+            <span class="stat-value" style="color: var(--neutral-orange-text);">₹{{ "{:,.2f}".format(revenue_stats.partial_revenue) }}</span>
+            <span class="stat-subtext">Partial settlements</span>
+        </div>
+        <div class="stat-icon stat-purple">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+        </div>
+    </div>
+
+    <!-- Total Invoices -->
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Total Invoices</span>
+            <span class="stat-value">{{ revenue_stats.total_bills }}</span>
+            <span class="stat-subtext">Billing transactions</span>
+        </div>
+        <div class="stat-icon stat-blue">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        </div>
+    </div>
+</div>
+
+<!-- Bills Table Card -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+            Invoices & Billing Ledger
+        </span>
+        <a href="{{ url_for('billing_add') }}" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Generate New Bill
+        </a>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div style="padding: 1.25rem 1.5rem; background: #fafafa; border-bottom: 1px solid var(--border-color);">
+        <form method="GET" action="{{ url_for('billing_list') }}" style="display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center;">
+            <div style="flex: 1; min-width: 200px;">
+                <input type="text" name="q" class="form-control" placeholder="Search by patient name..." value="{{ filters.q or '' }}">
+            </div>
+
+            <div style="min-width: 170px;">
+                <select name="status" class="form-control">
+                    <option value="">All Payment Statuses</option>
+                    <option value="Paid" {% if filters.status == 'Paid' %}selected{% endif %}>Paid</option>
+                    <option value="Pending" {% if filters.status == 'Pending' %}selected{% endif %}>Pending</option>
+                    <option value="Partially Paid" {% if filters.status == 'Partially Paid' %}selected{% endif %}>Partially Paid</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-secondary">Filter</button>
+            {% if filters.q or filters.status %}
+                <a href="{{ url_for('billing_list') }}" class="btn btn-secondary">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="card-body" style="padding: 0;">
+        {% if bills %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Bill #</th>
+                            <th>Date</th>
+                            <th>Patient Name</th>
+                            <th>Appt #</th>
+                            <th>Attending Doctor</th>
+                            <th>Amount</th>
+                            <th>Payment Status</th>
+                            <th>Insurance Details</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in bills %}
+                            <tr>
+                                <td><strong>#{{ b.bill_id }}</strong></td>
+                                <td>{{ b.bill_date }}</td>
+                                <td>
+                                    <a href="{{ url_for('patient_detail', patient_id=b.patient_id) }}" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                                        {{ b.patient_name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('appointment_detail', appointment_id=b.appointment_id) }}" class="badge badge-secondary" style="text-decoration: none;">
+                                        #{{ b.appointment_id }}
+                                    </a>
+                                </td>
+                                <td>{{ b.doctor_name or 'N/A' }}</td>
+                                <td><strong style="font-size: 0.95rem;">₹{{ "{:,.2f}".format(b.amount) }}</strong></td>
+                                <td>
+                                    {% if b.payment_status == 'Paid' %}
+                                        <span class="badge badge-paid"><span class="badge-dot"></span>Paid</span>
+                                    {% elif b.payment_status == 'Pending' %}
+                                        <span class="badge badge-pending"><span class="badge-dot"></span>Pending</span>
+                                    {% elif b.payment_status == 'Partially Paid' %}
+                                        <span class="badge badge-partially-paid"><span class="badge-dot"></span>Partially Paid</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">{{ b.payment_status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span style="font-size: 0.8rem; color: var(--text-muted);">{{ b.insurance_details or 'None' }}</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <div class="btn-group">
+                                        <a href="{{ url_for('billing_detail', bill_id=b.bill_id) }}" class="btn btn-secondary btn-sm" title="View Printable Invoice">
+                                            Receipt
+                                        </a>
+                                        <a href="{{ url_for('billing_edit', bill_id=b.bill_id) }}" class="btn btn-secondary btn-sm" title="Edit Bill">
+                                            Edit
+                                        </a>
+                                        {% if b.payment_status != 'Paid' %}
+                                            <form method="POST" action="{{ url_for('billing_status_update', bill_id=b.bill_id) }}" style="display: inline;">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <input type="hidden" name="payment_status" value="Paid">
+                                                <button type="submit" class="btn btn-success btn-sm" title="Mark Paid">Paid</button>
+                                            </form>
+                                        {% endif %}
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ url_for('billing_delete', bill_id=b.bill_id) }}', 'Bill', '#{{ b.bill_id }} (₹{{ '{:,.2f}'.format(b.amount) }})')" title="Delete Bill">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                <div class="empty-title">No billing records found</div>
+                <div class="empty-desc">No invoices match the specified query.</div>
+                {% if filters.q or filters.status %}
+                    <a href="{{ url_for('billing_list') }}" class="btn btn-secondary btn-sm">Clear Filters</a>
+                {% else %}
+                    <a href="{{ url_for('billing_add') }}" class="btn btn-primary btn-sm">Generate First Bill</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

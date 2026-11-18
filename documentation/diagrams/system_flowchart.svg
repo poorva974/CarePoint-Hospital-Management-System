@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 1050" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <defs>
+    <style>
+      .title { font-size: 20px; font-weight: bold; fill: #0f172a; text-anchor: middle; }
+      .subtitle { font-size: 13px; fill: #64748b; text-anchor: middle; }
+      .node-start { fill: #dcfce7; stroke: #16a34a; stroke-width: 2; rx: 25; ry: 25; }
+      .node-end { fill: #fee2e2; stroke: #dc2626; stroke-width: 2; rx: 25; ry: 25; }
+      .node-step { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; rx: 8; ry: 8; }
+      .node-decision { fill: #fffbeb; stroke: #d97706; stroke-width: 2; }
+      .text-node { font-size: 13px; font-weight: 600; fill: #0f172a; text-anchor: middle; }
+      .text-decision { font-size: 12px; font-weight: bold; fill: #92400e; text-anchor: middle; }
+      .flow-line { stroke: #475569; stroke-width: 1.8; fill: none; }
+      .flow-yes { font-size: 11px; font-weight: bold; fill: #16a34a; }
+      .flow-no { font-size: 11px; font-weight: bold; fill: #dc2626; }
+      .flow-label { font-size: 11px; fill: #475569; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="460" y="35" class="title">CarePoint Hospital Management System — System Flowchart</text>
+  <text x="460" y="55" class="subtitle">End-to-End User Authentication, Route Protection, and Module Execution Workflow</text>
+
+  <!-- 1. START -->
+  <g transform="translate(380, 80)">
+    <rect width="160" height="45" class="node-start" />
+    <text x="80" y="28" class="text-node" style="fill: #166534;">START</text>
+  </g>
+  <path d="M 460 125 L 460 160" class="flow-line" marker-end="url(#arrow)" />
+
+  <!-- 2. Landing Page -->
+  <g transform="translate(360, 160)">
+    <rect width="200" height="50" class="node-step" />
+    <text x="100" y="25" class="text-node">Landing Page ("/")</text>
+    <text x="100" y="42" style="font-size: 10px; fill: #64748b; text-anchor: middle;">Public Hospital Portal</text>
+  </g>
+  <path d="M 460 210 L 460 245" class="flow-line" marker-end="url(#arrow)" />
+  <text x="465" y="232" class="flow-label">Click "Get Started" / "Login"</text>
+
+  <!-- 3. Login Page -->
+  <g transform="translate(360, 245)">
+    <rect width="200" height="50" class="node-step" />
+    <text x="100" y="25" class="text-node">Login Page ("/login")</text>
+    <text x="100" y="42" style="font-size: 10px; fill: #64748b; text-anchor: middle;">Submit Email &amp; Password</text>
+  </g>
+  <path d="M 460 295 L 460 330" class="flow-line" marker-end="url(#arrow)" />
+
+  <!-- 4. Decision: Credentials Valid? -->
+  <g transform="translate(460, 375)">
+    <polygon points="0,-45 110,0 0,45 -110,0" class="node-decision" />
+    <text x="0" y="-8" class="text-decision">Credentials</text>
+    <text x="0" y="10" class="text-decision">Valid?</text>
+    <text x="0" y="26" style="font-size: 9px; fill: #b45309; text-anchor: middle;">(check_password_hash)</text>
+  </g>
+
+  <!-- Invalid Path (Loop back to Login) -->
+  <path d="M 350 375 L 240 375 L 240 270 L 360 270" class="flow-line" marker-end="url(#arrow)" />
+  <text x="250" y="365" class="flow-no">NO (Invalid)</text>
+  <text x="170" y="320" style="font-size: 10px; fill: #dc2626;">Flash error message &amp;</text>
+  <text x="170" y="335" style="font-size: 10px; fill: #dc2626;">prompt retry</text>
+
+  <!-- Valid Path to Session Creation -->
+  <path d="M 460 420 L 460 455" class="flow-line" marker-end="url(#arrow)" />
+  <text x="465" y="440" class="flow-yes">YES (Valid)</text>
+
+  <!-- 5. Create Session & Regenerate -->
+  <g transform="translate(340, 455)">
+    <rect width="240" height="45" class="node-step" />
+    <text x="120" y="22" class="text-node">Regenerate Session State</text>
+    <text x="120" y="38" style="font-size: 10px; fill: #64748b; text-anchor: middle;">Store user_id, role, set CSRF token</text>
+  </g>
+  <path d="M 460 500 L 460 535" class="flow-line" marker-end="url(#arrow)" />
+
+  <!-- 6. Dashboard -->
+  <g transform="translate(350, 535)">
+    <rect width="220" height="50" class="node-step" />
+    <text x="110" y="25" class="text-node">Dashboard ("/dashboard")</text>
+    <text x="110" y="42" style="font-size: 10px; fill: #64748b; text-anchor: middle;">Aggregates &amp; Quick Actions</text>
+  </g>
+
+  <!-- Unauthenticated Direct Access Interception Flow -->
+  <g transform="translate(680, 520)">
+    <rect width="180" height="75" fill="#fef2f2" stroke="#ef4444" stroke-dasharray="4,4" rx="6" />
+    <text x="90" y="22" style="font-size: 11px; font-weight: bold; fill: #991b1b; text-anchor: middle;">Unauthenticated User</text>
+    <text x="90" y="38" style="font-size: 10px; fill: #7f1d1d; text-anchor: middle;">Attempts direct URL access</text>
+    <text x="90" y="52" style="font-size: 10px; fill: #7f1d1d; text-anchor: middle;">to /dashboard or module</text>
+  </g>
+  <path d="M 770 520 L 770 270 L 560 270" class="flow-line" stroke="#dc2626" stroke-dasharray="4,4" marker-end="url(#arrow)" />
+  <text x="690" y="310" class="flow-no">@login_required intercepts</text>
+  <text x="690" y="325" style="font-size: 10px; fill: #b91c1c;">Redirect to /login?next=...</text>
+
+  <!-- Flow to Module Selection -->
+  <path d="M 460 585 L 460 620" class="flow-line" marker-end="url(#arrow)" />
+
+  <!-- 7. Select Management Module -->
+  <g transform="translate(320, 620)">
+    <rect width="280" height="50" class="node-step" />
+    <text x="140" y="25" class="text-node">Select Management Module</text>
+    <text x="140" y="42" style="font-size: 10px; fill: #64748b; text-anchor: middle;">Patients / Doctors / Appointments / EHR / Billing</text>
+  </g>
+  <path d="M 460 670 L 460 705" class="flow-line" marker-end="url(#arrow)" />
+
+  <!-- 8. Execute Database Operation -->
+  <g transform="translate(320, 705)">
+    <rect width="280" height="55" class="node-step" />
+    <text x="140" y="24" class="text-node">Execute Database Operation</text>
+    <text x="140" y="40" style="font-size: 10px; fill: #64748b; text-anchor: middle;">CRUD / Search / Filter / Deletion Guard</text>
+    <text x="140" y="52" style="font-size: 9px; fill: #2563eb; text-anchor: middle;">Parameterized SQL Query via mysql-connector</text>
+  </g>
+  <path d="M 460 760 L 460 795" class="flow-line" marker-end="url(#arrow)" />
+
+  <!-- 9. Render Result & Feedback -->
+  <g transform="translate(340, 795)">
+    <rect width="240" height="45" class="node-step" />
+    <text x="120" y="22" class="text-node">Render Result &amp; Flash Notice</text>
+    <text x="120" y="38" style="font-size: 10px; fill: #64748b; text-anchor: middle;">Post/Redirect/Get Pattern</text>
+  </g>
+  <path d="M 460 840 L 460 875" class="flow-line" marker-end="url(#arrow)" />
+
+  <!-- 10. Decision: Logout or Continue? -->
+  <g transform="translate(460, 915)">
+    <polygon points="0,-40 100,0 0,40 -100,0" class="node-decision" />
+    <text x="0" y="-5" class="text-decision">Session</text>
+    <text x="0" y="12" class="text-decision">Logout?</text>
+  </g>
+
+  <!-- Continue Loop -->
+  <path d="M 360 915 L 200 915 L 200 560 L 350 560" class="flow-line" marker-end="url(#arrow)" />
+  <text x="210" y="905" class="flow-no">NO (Continue)</text>
+  <text x="210" y="740" class="flow-label">Navigate to other modules</text>
+
+  <!-- Logout Path -->
+  <path d="M 460 955 L 460 985" class="flow-line" marker-end="url(#arrow)" />
+  <text x="465" y="972" class="flow-yes">YES (Logout)</text>
+
+  <!-- 11. END -->
+  <g transform="translate(380, 985)">
+    <rect width="160" height="45" class="node-end" />
+    <text x="80" y="22" class="text-node" style="fill: #991b1b;">END</text>
+    <text x="80" y="38" style="font-size: 10px; fill: #7f1d1d; text-anchor: middle;">Session Cleared &rarr; Redirect</text>
+  </g>
+</svg>
+

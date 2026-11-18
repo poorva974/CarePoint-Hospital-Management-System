@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Patient #{{ patient.patient_id }} - {{ patient.name }} - CarePoint{% endblock %}
+{% block page_title %}{{ patient.name }}{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('patients_list') }}" style="color: inherit; text-decoration: none;">Patients</a> &rsaquo; Patient Profile #{{ patient.patient_id }}{% endblock %}
+
+{% block content %}
+<!-- Patient Demographic Details Card -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Patient Demographic Information
+        </span>
+        <div class="btn-group">
+            <a href="{{ url_for('patient_edit', patient_id=patient.patient_id) }}" class="btn btn-secondary btn-sm">Edit Profile</a>
+            <a href="{{ url_for('appointment_add', patient_id=patient.patient_id) }}" class="btn btn-primary btn-sm">Book Appointment</a>
+            <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ url_for('patient_delete', patient_id=patient.patient_id) }}', 'Patient', '{{ patient.name }}')">Delete</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="detail-grid">
+            <div class="detail-item">
+                <dt>Patient ID</dt>
+                <dd>#{{ patient.patient_id }}</dd>
+            </div>
+            <div class="detail-item">
+                <dt>Full Name</dt>
+                <dd>{{ patient.name }}</dd>
+            </div>
+            <div class="detail-item">
+                <dt>Gender</dt>
+                <dd>{{ patient.gender or 'Not specified' }}</dd>
+            </div>
+            <div class="detail-item">
+                <dt>Date of Birth</dt>
+                <dd>{{ patient.dob or 'Not recorded' }}</dd>
+            </div>
+            <div class="detail-item">
+                <dt>Phone Number</dt>
+                <dd>{{ patient.phone or 'Not recorded' }}</dd>
+            </div>
+            <div class="detail-item">
+                <dt>Address</dt>
+                <dd>{{ patient.address or 'Not recorded' }}</dd>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Related Appointments (1:N Relationship) -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Appointment History (JOIN appointment & doctor)
+        </span>
+        <a href="{{ url_for('appointment_add', patient_id=patient.patient_id) }}" class="btn btn-secondary btn-sm">+ New Appointment</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        {% if appointments %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Appt ID</th>
+                            <th>Doctor</th>
+                            <th>Department</th>
+                            <th>Date</th>
+                            <th>Time Slot</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apt in appointments %}
+                            <tr>
+                                <td><strong>#{{ apt.appointment_id }}</strong></td>
+                                <td>{{ apt.doctor_name }}</td>
+                                <td><span class="badge badge-secondary">{{ apt.department or 'General' }}</span></td>
+                                <td>{{ apt.appointment_date }}</td>
+                                <td>{{ apt.time_slot }}</td>
+                                <td>
+                                    {% if apt.status == 'Scheduled' %}
+                                        <span class="badge badge-scheduled">Scheduled</span>
+                                    {% elif apt.status == 'Completed' %}
+                                        <span class="badge badge-completed">Completed</span>
+                                    {% elif apt.status == 'Cancelled' %}
+                                        <span class="badge badge-cancelled">Cancelled</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">{{ apt.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: right;">
+                                    <a href="{{ url_for('appointment_detail', appointment_id=apt.appointment_id) }}" class="btn btn-secondary btn-sm">View</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state" style="padding: 2rem;">
+                <div class="empty-title">No appointments found</div>
+                <div class="empty-desc">This patient has no appointments on record.</div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Related Medical Records & Billing in 2 columns -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+    <!-- Medical Records -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                Clinical Medical Records
+            </span>
+            <a href="{{ url_for('medical_record_add', patient_id=patient.patient_id) }}" class="btn btn-secondary btn-sm">+ Add Record</a>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            {% if medical_records %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Doctor</th>
+                            <th>Diagnosis</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rec in medical_records %}
+                            <tr>
+                                <td>{{ rec.record_date }}</td>
+                                <td>{{ rec.doctor_name }}</td>
+                                <td><strong>{{ rec.diagnosis or 'Consultation' }}</strong></td>
+                                <td style="text-align: right;">
+                                    <a href="{{ url_for('medical_record_detail', record_id=rec.record_id) }}" class="btn btn-secondary btn-sm">View</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state" style="padding: 2rem;">
+                    <div class="empty-desc">No clinical records found for this patient.</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Billing Invoices -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                Billing & Payments
+            </span>
+            <a href="{{ url_for('billing_add', patient_id=patient.patient_id) }}" class="btn btn-secondary btn-sm">+ New Bill</a>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            {% if bills %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Bill #</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bill in bills %}
+                            <tr>
+                                <td>#{{ bill.bill_id }}</td>
+                                <td>{{ bill.bill_date }}</td>
+                                <td><strong>₹{{ "{:,.2f}".format(bill.amount) }}</strong></td>
+                                <td>
+                                    {% if bill.payment_status == 'Paid' %}
+                                        <span class="badge badge-paid">Paid</span>
+                                    {% elif bill.payment_status == 'Pending' %}
+                                        <span class="badge badge-pending">Pending</span>
+                                    {% elif bill.payment_status == 'Partially Paid' %}
+                                        <span class="badge badge-partially-paid">Partially Paid</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">{{ bill.payment_status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: right;">
+                                    <a href="{{ url_for('billing_detail', bill_id=bill.bill_id) }}" class="btn btn-secondary btn-sm">Receipt</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state" style="padding: 2rem;">
+                    <div class="empty-desc">No bills generated for this patient yet.</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

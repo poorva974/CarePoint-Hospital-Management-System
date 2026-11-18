@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarePoint - Smarter Hospital Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="landing-body">
+
+    <!-- Navigation Bar -->
+    <header class="landing-nav">
+        <a href="#hero" class="landing-nav-brand">
+            <div class="brand-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 6v12m-6-6h12"/>
+                </svg>
+            </div>
+            <h1>CarePoint</h1>
+        </a>
+
+        <ul class="landing-nav-links">
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#about">About</a></li>
+        </ul>
+
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Go to Dashboard &rarr;</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-secondary" style="background: transparent; color: var(--navy-800); border: 1px solid #cbd5e1;">Log In</a>
+                <a href="{{ url_for('signup') }}" class="btn btn-primary">Sign Up</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="landing-hero" id="hero">
+        <div class="landing-hero-container">
+            <div class="hero-pill">
+                <span class="badge-dot" style="background-color: var(--primary);"></span>
+                Enterprise Hospital Information System
+            </div>
+            <h2>Smarter Hospital Management, Better Patient Care.</h2>
+            <p>
+                Manage patients, doctors, appointments, medical records, and
+                billing through one organized hospital administration platform.
+                A centralized hospital management platform designed to simplify patient records,
+                doctor management, appointments, medical records, and billing.
+            </p>
+
+            <div class="hero-actions">
+                <a href="{{ url_for('signup') }}" class="btn btn-primary">
+                    Get Started
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+                <a href="#features" class="btn btn-secondary">
+                    Explore Features
+                </a>
+            </div>
+
+            <!-- Professional Mockup / Interactive UI Preview -->
+            <div class="hero-mockup-card">
+                <div class="mockup-header">
+                    <div class="mockup-dots">
+                        <div class="mockup-dot" style="background-color: #ef4444;"></div>
+                        <div class="mockup-dot" style="background-color: #f59e0b;"></div>
+                        <div class="mockup-dot" style="background-color: #10b981;"></div>
+                    </div>
+                    <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; display: flex; align-items: center; gap: 0.35rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        carepoint.health/dashboard
+                    </div>
+                    <span class="badge badge-paid" style="font-size: 0.72rem;">Live MySQL 8.0</span>
+                </div>
+
+                <div class="mockup-grid">
+                    <div class="mockup-stat">
+                        <div class="mockup-stat-title">Patient Records</div>
+                        <div class="mockup-stat-value" style="color: var(--primary);">Integrated</div>
+                        <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">Demographics & History</div>
+                    </div>
+                    <div class="mockup-stat">
+                        <div class="mockup-stat-title">Doctor Scheduling</div>
+                        <div class="mockup-stat-value" style="color: #7c3aed;">Conflict-Free</div>
+                        <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">Slot Time Allocation</div>
+                    </div>
+                    <div class="mockup-stat">
+                        <div class="mockup-stat-title">Clinical Charting</div>
+                        <div class="mockup-stat-value" style="color: #059669;">Secured</div>
+                        <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">Prescriptions & Reports</div>
+                    </div>
+                    <div class="mockup-stat">
+                        <div class="mockup-stat-title">Billing Ledger</div>
+                        <div class="mockup-stat-value" style="color: #d97706;">Audited</div>
+                        <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">Automated Invoices</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="landing-section" id="features">
+        <div class="section-title-wrap">
+            <span class="section-tag">Core Modules</span>
+            <h3 class="section-heading">Designed for Healthcare Excellence</h3>
+            <p class="section-desc">CarePoint unifies administrative workflows, clinical documentation, and revenue management into one secure system.</p>
+        </div>
+
+        <div class="features-grid">
+            <!-- Patient Management -->
+            <div class="feature-card">
+                <div class="feature-icon-box stat-blue">
+                    <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <h4 class="feature-title">Patient Management</h4>
+                <p class="feature-text">
+                    Comprehensive patient registration, demographic tracking, phone/name search,
+                    and individual patient timelines showing complete appointment and billing histories.
+                </p>
+            </div>
+
+            <!-- Doctor Management -->
+            <div class="feature-card">
+                <div class="feature-icon-box stat-purple">
+                    <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                </div>
+                <h4 class="feature-title">Doctor Management</h4>
+                <p class="feature-text">
+                    Maintain specialist directories across departments (Cardiology, Neurology, Pediatrics, etc.),
+                    track contact details, and evaluate physician workload with consultation analytics.
+                </p>
+            </div>
+
+            <!-- Appointment Scheduling -->
+            <div class="feature-card">
+                <div class="feature-icon-box stat-amber">
+                    <svg viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                </div>
+                <h4 class="feature-title">Appointment Scheduling</h4>
+                <p class="feature-text">
+                    Conflict-aware appointment booking preventing doctor double-booking and past dates.
+                    Support for real-time status updates (Scheduled, Completed, Cancelled).
+                </p>
+            </div>
+
+            <!-- Medical Records -->
+            <div class="feature-card">
+                <div class="feature-icon-box stat-green">
+                    <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                </div>
+                <h4 class="feature-title">Medical Records</h4>
+                <p class="feature-text">
+                    Detailed electronic health records storing diagnoses, prescriptions, and lab examination
+                    reports with strict relational foreign-key validation linking patient, doctor, and appointment.
+                </p>
+            </div>
+
+            <!-- Billing Management -->
+            <div class="feature-card">
+                <div class="feature-icon-box stat-cyan">
+                    <svg viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                </div>
+                <h4 class="feature-title">Billing & Invoices</h4>
+                <p class="feature-text">
+                    Itemized billing invoices with payment status tracking (Paid, Pending, Partially Paid),
+                    insurance notations, aggregate revenue summaries, and printable official receipts.
+                </p>
+            </div>
+
+            <!-- DBMS Integrity & Security -->
+            <div class="feature-card">
+                <div class="feature-icon-box" style="background-color: #fee2e2; color: #dc2626;">
+                    <svg viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+                <h4 class="feature-title">Relational DBMS Integrity</h4>
+                <p class="feature-text">
+                    Guaranteed referential integrity preventing accidental orphan records, parameterized
+                    queries eliminating SQL injection, password hashing, and session authentication.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="landing-section about-section" id="about">
+        <div class="about-grid">
+            <div>
+                <span class="section-tag">About CarePoint</span>
+                <h3 class="section-heading">Engineered for Reliability and Compliance</h3>
+                <p style="color: #475569; font-size: 1.05rem; line-height: 1.7; margin-top: 1rem;">
+                    CarePoint is developed as a comprehensive DBMS mini-project showcasing industry-standard
+                    relational database design and server-side engineering. The platform eliminates manual paper records,
+                    enforces data consistency, and optimizes hospital resource utilization.
+                </p>
+
+                <div class="about-points">
+                    <div class="about-point-item">
+                        <div class="about-check">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                        <div>
+                            <strong style="color: #0f172a;">Normalized Relational Schema</strong>
+                            <p style="color: #64748b; font-size: 0.88rem;">Structured in 3rd Normal Form (3NF) to minimize redundancy across patients, staff, consultations, and finance.</p>
+                        </div>
+                    </div>
+
+                    <div class="about-point-item">
+                        <div class="about-check">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                        <div>
+                            <strong style="color: #0f172a;">ACID Transactions & Foreign Key Constraints</strong>
+                            <p style="color: #64748b; font-size: 0.88rem;">Safe cascade validation protects historical medical and billing records from inadvertent data loss.</p>
+                        </div>
+                    </div>
+
+                    <div class="about-point-item">
+                        <div class="about-check">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                        <div>
+                            <strong style="color: #0f172a;">Role-Based Authentication & CSRF Shield</strong>
+                            <p style="color: #64748b; font-size: 0.88rem;">Cryptographic scrypt password hashing and session-bound CSRF token verification on all mutation operations.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="about-db-badge-list">
+                    <span class="db-badge-item">MySQL 8.0</span>
+                    <span class="db-badge-item">Python 3.14 / Flask</span>
+                    <span class="db-badge-item">Jinja2 Engine</span>
+                    <span class="db-badge-item">SCrypt Hashing</span>
+                    <span class="db-badge-item">Parameterized Queries</span>
+                </div>
+            </div>
+
+            <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2.25rem; box-shadow: var(--shadow-sm);">
+                <h4 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    Hospital Administrative Portal
+                </h4>
+                <p style="font-size: 0.88rem; color: #64748b; line-height: 1.6; margin-bottom: 1.5rem;">
+                    Only authorized hospital administrators and healthcare staff are permitted to access clinical records, patient files, and revenue ledgers.
+                </p>
+                <div style="background: #f8fafc; border-left: 4px solid var(--primary); padding: 1rem; border-radius: 4px; margin-bottom: 1.75rem; font-size: 0.85rem; color: #334155;">
+                    <strong>Academic DBMS Mini-Project:</strong> Built with live MySQL database connectivity, demonstrating practical relational DBMS theory and web development concepts.
+                </div>
+                <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: 100%;">
+                    Access Staff Portal &rarr;
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.75rem;">
+                    <div class="brand-icon" style="width: 32px; height: 32px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 6v12m-6-6h12"/></svg>
+                    </div>
+                    <h3>CarePoint</h3>
+                </div>
+                <p style="font-size: 0.88rem; line-height: 1.6; max-width: 380px;">
+                    Centralized Hospital Management System designed for hospital administration,
+                    appointment scheduling, electronic health records, and billing management.
+                </p>
+            </div>
+
+            <div class="footer-col">
+                <h4>Navigation</h4>
+                <ul class="footer-links">
+                    <li><a href="#hero">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#about">About Platform</a></li>
+                    <li><a href="{{ url_for('login') }}">Staff Login</a></li>
+                    <li><a href="{{ url_for('signup') }}">Staff Registration</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>System Architecture</h4>
+                <ul class="footer-links">
+                    <li><a href="#features">MySQL Relational Schema</a></li>
+                    <li><a href="#features">ACID Transactions</a></li>
+                    <li><a href="#features">Foreign Key Controls</a></li>
+                    <li><a href="#features">Flask Python Backend</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div>&copy; 2026 CarePoint Hospital Management System. All rights reserved.</div>
+            <div style="color: #64748b;">DBMS Mini-Project | Academic Demonstration</div>
+        </div>
+    </footer>
+
+</body>
+</html>
+

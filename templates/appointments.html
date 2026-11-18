@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Appointment Management - CarePoint{% endblock %}
+{% block page_title %}Appointments Management{% endblock %}
+{% block breadcrumb %}Schedule & Consultations{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Appointments Directory
+        </span>
+        <a href="{{ url_for('appointment_add') }}" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Book New Appointment
+        </a>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div style="padding: 1.25rem 1.5rem; background: #fafafa; border-bottom: 1px solid var(--border-color);">
+        <form method="GET" action="{{ url_for('appointments_list') }}" style="display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center;">
+            <!-- Search Text -->
+            <div style="flex: 1; min-width: 200px;">
+                <input type="text" name="q" class="form-control" placeholder="Search patient or doctor..." value="{{ filters.q or '' }}">
+            </div>
+
+            <!-- Status Filter -->
+            <div style="min-width: 140px;">
+                <select name="status" class="form-control">
+                    <option value="">All Statuses</option>
+                    <option value="Scheduled" {% if filters.status == 'Scheduled' %}selected{% endif %}>Scheduled</option>
+                    <option value="Completed" {% if filters.status == 'Completed' %}selected{% endif %}>Completed</option>
+                    <option value="Cancelled" {% if filters.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </div>
+
+            <!-- Doctor Filter -->
+            <div style="min-width: 160px;">
+                <select name="doctor_id" class="form-control">
+                    <option value="">All Doctors</option>
+                    {% for doc in doctors %}
+                        <option value="{{ doc.doctor_id }}" {% if filters.doctor_id|string == doc.doctor_id|string %}selected{% endif %}>
+                            {{ doc.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Date Filter -->
+            <div style="min-width: 150px;">
+                <input type="date" name="date" class="form-control" value="{{ filters.date or '' }}">
+            </div>
+
+            <!-- Submit & Reset -->
+            <button type="submit" class="btn btn-secondary">Filter</button>
+            {% if filters.q or filters.status or filters.doctor_id or filters.date %}
+                <a href="{{ url_for('appointments_list') }}" class="btn btn-secondary" title="Reset Filters">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="card-body" style="padding: 0;">
+        {% if appointments %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Department</th>
+                            <th>Date</th>
+                            <th>Time Slot</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apt in appointments %}
+                            <tr>
+                                <td><strong>#{{ apt.appointment_id }}</strong></td>
+                                <td>
+                                    <a href="{{ url_for('patient_detail', patient_id=apt.patient_id) }}" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                                        {{ apt.patient_name }}
+                                    </a>
+                                    {% if apt.patient_phone %}
+                                        <div style="font-size: 0.74rem; color: var(--text-muted);">{{ apt.patient_phone }}</div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('doctor_detail', doctor_id=apt.doctor_id) }}" style="color: var(--text-dark); text-decoration: none; font-weight: 500;">
+                                        {{ apt.doctor_name }}
+                                    </a>
+                                </td>
+                                <td><span class="badge badge-secondary">{{ apt.department or 'General' }}</span></td>
+                                <td>{{ apt.appointment_date }}</td>
+                                <td>{{ apt.time_slot }}</td>
+                                <td>
+                                    {% if apt.status == 'Scheduled' %}
+                                        <span class="badge badge-scheduled"><span class="badge-dot"></span>Scheduled</span>
+                                    {% elif apt.status == 'Completed' %}
+                                        <span class="badge badge-completed"><span class="badge-dot"></span>Completed</span>
+                                    {% elif apt.status == 'Cancelled' %}
+                                        <span class="badge badge-cancelled"><span class="badge-dot"></span>Cancelled</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">{{ apt.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: right;">
+                                    <div class="btn-group">
+                                        <a href="{{ url_for('appointment_detail', appointment_id=apt.appointment_id) }}" class="btn btn-secondary btn-sm" title="View Details">
+                                            View
+                                        </a>
+                                        <a href="{{ url_for('appointment_edit', appointment_id=apt.appointment_id) }}" class="btn btn-secondary btn-sm" title="Edit Appointment">
+                                            Edit
+                                        </a>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ url_for('appointment_delete', appointment_id=apt.appointment_id) }}', 'Appointment', '#{{ apt.appointment_id }} ({{ apt.patient_name }})')" title="Delete Appointment">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <div class="empty-title">No appointments found</div>
+                <div class="empty-desc">No appointment records matched the selected criteria.</div>
+                {% if filters.q or filters.status or filters.doctor_id or filters.date %}
+                    <a href="{{ url_for('appointments_list') }}" class="btn btn-secondary btn-sm">Clear Filters</a>
+                {% else %}
+                    <a href="{{ url_for('appointment_add') }}" class="btn btn-primary btn-sm">Book First Appointment</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

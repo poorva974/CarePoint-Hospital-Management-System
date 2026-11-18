@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Doctor' if doctor else 'Add New Doctor' }} - CarePoint{% endblock %}
+{% block page_title %}{{ 'Edit Doctor Profile' if doctor else 'Register New Doctor' }}{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('doctors_list') }}" style="color: inherit; text-decoration: none;">Doctors</a> &rsaquo; {{ 'Edit #' ~ doctor.doctor_id if doctor else 'New' }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 760px; margin: 0 auto;">
+    <div class="card-header">
+        <span class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><circle cx="20" cy="10" r="2"/></svg>
+            {{ 'Edit Doctor Information' if doctor else 'Doctor Professional Details' }}
+        </span>
+        <a href="{{ url_for('doctors_list') }}" class="btn btn-secondary btn-sm">&larr; Back to Doctors</a>
+    </div>
+
+    <div class="card-body">
+        <form method="POST" action="">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-grid">
+                <!-- Name -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="name">Doctor Name <span class="required">*</span></label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Dr. Amit Sharma" required maxlength="100" value="{{ form_data.name if form_data else (doctor.name if doctor else '') }}">
+                    <span class="form-hint">Full professional title and name</span>
+                </div>
+
+                <!-- Specialization -->
+                <div class="form-group">
+                    <label class="form-label" for="specialization">Specialization</label>
+                    <input type="text" id="specialization" name="specialization" class="form-control" placeholder="e.g. Cardiologist" maxlength="100" value="{{ form_data.specialization if form_data else (doctor.specialization if doctor else '') }}">
+                </div>
+
+                <!-- Department -->
+                <div class="form-group">
+                    <label class="form-label" for="department">Department</label>
+                    <input type="text" id="department" name="department" class="form-control" placeholder="e.g. Cardiology" maxlength="100" value="{{ form_data.department if form_data else (doctor.department if doctor else '') }}">
+                </div>
+
+                <!-- Phone -->
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g. 9876510001" maxlength="15" value="{{ form_data.phone if form_data else (doctor.phone if doctor else '') }}">
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="e.g. amit@example.com" maxlength="100" value="{{ form_data.email if form_data else (doctor.email if doctor else '') }}">
+                    <span class="form-hint">Hospital or professional correspondence email</span>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    {{ 'Update Doctor' if doctor else 'Save Doctor' }}
+                </button>
+                <a href="{{ url_for('doctors_list') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

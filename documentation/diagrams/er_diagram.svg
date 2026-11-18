@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 850" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <defs>
+    <style>
+      .title { font-size: 22px; font-weight: bold; fill: #0f172a; text-anchor: middle; }
+      .subtitle { font-size: 13px; fill: #64748b; text-anchor: middle; }
+      .entity-box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; rx: 8; ry: 8; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.06)); }
+      .entity-header { fill: #1e293b; rx: 8; ry: 8; }
+      .header-text { font-size: 14px; font-weight: bold; fill: #ffffff; text-anchor: middle; }
+      .col-pk { font-size: 12px; font-weight: bold; fill: #b45309; }
+      .col-fk { font-size: 12px; font-weight: bold; fill: #0369a1; }
+      .col-norm { font-size: 12px; fill: #334155; }
+      .col-type { font-size: 11px; fill: #64748b; text-anchor: end; }
+      .relation-line { stroke: #2563eb; stroke-width: 2; fill: none; stroke-dasharray: none; }
+      .relation-label { font-size: 11px; fill: #1e40af; font-weight: 600; background: #ffffff; }
+      .legend-text { font-size: 11px; fill: #475569; }
+    </style>
+  </defs>
+
+  <!-- Title Block -->
+  <text x="550" y="35" class="title">CarePoint Hospital Management System — Entity Relationship Diagram</text>
+  <text x="550" y="55" class="subtitle">MySQL Database Schema (`hospital_management`) with Enforced Referential Constraints</text>
+
+  <!-- ==================== ENTITY: PATIENT ==================== -->
+  <g transform="translate(60, 90)">
+    <rect width="260" height="200" class="entity-box" />
+    <path d="M 0 0 L 260 0 L 260 32 L 0 32 Z" class="entity-header" />
+    <text x="130" y="21" class="header-text">PATIENT</text>
+    
+    <text x="15" y="55" class="col-pk">🔑 patient_id</text> <text x="245" y="55" class="col-type">INT [PK, AI]</text>
+    <line x1="10" y1="65" x2="250" y2="65" stroke="#f1f5f9" stroke-width="1" />
+    <text x="15" y="85" class="col-norm">name</text> <text x="245" y="85" class="col-type">VARCHAR(100) NOT NULL</text>
+    <text x="15" y="110" class="col-norm">gender</text> <text x="245" y="110" class="col-type">VARCHAR(20)</text>
+    <text x="15" y="135" class="col-norm">dob</text> <text x="245" y="135" class="col-type">DATE</text>
+    <text x="15" y="160" class="col-norm">phone</text> <text x="245" y="160" class="col-type">VARCHAR(15)</text>
+    <text x="15" y="185" class="col-norm">address</text> <text x="245" y="185" class="col-type">VARCHAR(255)</text>
+  </g>
+
+  <!-- ==================== ENTITY: DOCTOR ==================== -->
+  <g transform="translate(780, 90)">
+    <rect width="260" height="200" class="entity-box" />
+    <path d="M 0 0 L 260 0 L 260 32 L 0 32 Z" class="entity-header" />
+    <text x="130" y="21" class="header-text">DOCTOR</text>
+    
+    <text x="15" y="55" class="col-pk">🔑 doctor_id</text> <text x="245" y="55" class="col-type">INT [PK, AI]</text>
+    <line x1="10" y1="65" x2="250" y2="65" stroke="#f1f5f9" stroke-width="1" />
+    <text x="15" y="85" class="col-norm">name</text> <text x="245" y="85" class="col-type">VARCHAR(100) NOT NULL</text>
+    <text x="15" y="110" class="col-norm">specialization</text> <text x="245" y="110" class="col-type">VARCHAR(100)</text>
+    <text x="15" y="135" class="col-norm">department</text> <text x="245" y="135" class="col-type">VARCHAR(100)</text>
+    <text x="15" y="160" class="col-norm">phone</text> <text x="245" y="160" class="col-type">VARCHAR(15)</text>
+    <text x="15" y="185" class="col-norm">email</text> <text x="245" y="185" class="col-type">VARCHAR(100)</text>
+  </g>
+
+  <!-- ==================== ENTITY: APPOINTMENT ==================== -->
+  <g transform="translate(420, 240)">
+    <rect width="260" height="200" class="entity-box" />
+    <path d="M 0 0 L 260 0 L 260 32 L 0 32 Z" class="entity-header" />
+    <text x="130" y="21" class="header-text">APPOINTMENT</text>
+    
+    <text x="15" y="55" class="col-pk">🔑 appointment_id</text> <text x="245" y="55" class="col-type">INT [PK, AI]</text>
+    <text x="15" y="80" class="col-fk">🔗 patient_id</text> <text x="245" y="80" class="col-type">INT [FK -> patient]</text>
+    <text x="15" y="105" class="col-fk">🔗 doctor_id</text> <text x="245" y="105" class="col-type">INT [FK -> doctor]</text>
+    <line x1="10" y1="115" x2="250" y2="115" stroke="#f1f5f9" stroke-width="1" />
+    <text x="15" y="135" class="col-norm">appointment_date</text> <text x="245" y="135" class="col-type">DATE NOT NULL</text>
+    <text x="15" y="160" class="col-norm">time_slot</text> <text x="245" y="160" class="col-type">VARCHAR(30)</text>
+    <text x="15" y="185" class="col-norm">status</text> <text x="245" y="185" class="col-type">VARCHAR(30) DEFAULT</text>
+  </g>
+
+  <!-- ==================== ENTITY: MEDICAL RECORD ==================== -->
+  <g transform="translate(140, 520)">
+    <rect width="280" height="230" class="entity-box" />
+    <path d="M 0 0 L 280 0 L 280 32 L 0 32 Z" class="entity-header" />
+    <text x="140" y="21" class="header-text">MEDICAL_RECORD</text>
+    
+    <text x="15" y="55" class="col-pk">🔑 record_id</text> <text x="265" y="55" class="col-type">INT [PK, AI]</text>
+    <text x="15" y="80" class="col-fk">🔗 patient_id</text> <text x="265" y="80" class="col-type">INT [FK -> patient]</text>
+    <text x="15" y="105" class="col-fk">🔗 doctor_id</text> <text x="265" y="105" class="col-type">INT [FK -> doctor]</text>
+    <text x="15" y="130" class="col-fk">🔗 appointment_id</text> <text x="265" y="130" class="col-type">INT [FK -> appt]</text>
+    <line x1="10" y1="140" x2="270" y2="140" stroke="#f1f5f9" stroke-width="1" />
+    <text x="15" y="160" class="col-norm">diagnosis</text> <text x="265" y="160" class="col-type">TEXT</text>
+    <text x="15" y="185" class="col-norm">prescription</text> <text x="265" y="185" class="col-type">TEXT</text>
+    <text x="15" y="205" class="col-norm">report</text> <text x="265" y="205" class="col-type">TEXT</text>
+    <text x="15" y="225" class="col-norm">record_date</text> <text x="265" y="225" class="col-type">DATE (CURDATE)</text>
+  </g>
+
+  <!-- ==================== ENTITY: BILLING ==================== -->
+  <g transform="translate(680, 520)">
+    <rect width="280" height="210" class="entity-box" />
+    <path d="M 0 0 L 280 0 L 280 32 L 0 32 Z" class="entity-header" />
+    <text x="140" y="21" class="header-text">BILLING</text>
+    
+    <text x="15" y="55" class="col-pk">🔑 bill_id</text> <text x="265" y="55" class="col-type">INT [PK, AI]</text>
+    <text x="15" y="80" class="col-fk">🔗 patient_id</text> <text x="265" y="80" class="col-type">INT [FK -> patient]</text>
+    <text x="15" y="105" class="col-fk">🔗 appointment_id</text> <text x="265" y="105" class="col-type">INT [FK -> appt]</text>
+    <line x1="10" y1="115" x2="270" y2="115" stroke="#f1f5f9" stroke-width="1" />
+    <text x="15" y="135" class="col-norm">amount</text> <text x="265" y="135" class="col-type">DECIMAL(10,2) NOT NULL</text>
+    <text x="15" y="160" class="col-norm">payment_status</text> <text x="265" y="160" class="col-type">VARCHAR(30)</text>
+    <text x="15" y="185" class="col-norm">insurance_details</text> <text x="265" y="185" class="col-type">TEXT</text>
+    <text x="15" y="205" class="col-norm">bill_date</text> <text x="265" y="205" class="col-type">DATE (CURDATE)</text>
+  </g>
+
+  <!-- ==================== ENTITY: USERS (AUTH) ==================== -->
+  <g transform="translate(460, 40)">
+    <rect width="180" height="130" class="entity-box" style="stroke: #93c5fd;" />
+    <path d="M 0 0 L 180 0 L 180 26 L 0 26 Z" style="fill: #2563eb;" />
+    <text x="90" y="18" class="header-text" style="font-size: 12px;">USERS (AUTH)</text>
+    
+    <text x="10" y="45" class="col-pk">🔑 user_id</text> <text x="170" y="45" class="col-type">INT [PK]</text>
+    <text x="10" y="65" class="col-norm">name</text> <text x="170" y="65" class="col-type">VARCHAR(100)</text>
+    <text x="10" y="85" class="col-norm">email [UK]</text> <text x="170" y="85" class="col-type">VARCHAR(100)</text>
+    <text x="10" y="105" class="col-norm">password_hash</text> <text x="170" y="105" class="col-type">VARCHAR(255)</text>
+    <text x="10" y="125" class="col-norm">role</text> <text x="170" y="125" class="col-type">Admin/Staff</text>
+  </g>
+
+  <!-- ==================== RELATIONSHIP CONNECTORS ==================== -->
+  <!-- Patient to Appointment: 1 to N -->
+  <path d="M 320 200 L 420 270" class="relation-line" />
+  <circle cx="320" cy="200" r="4" fill="#2563eb" />
+  <polygon points="420,270 410,265 412,275" fill="#2563eb" />
+  <text x="350" y="225" class="relation-label">1 : N (books)</text>
+
+  <!-- Doctor to Appointment: 1 to N -->
+  <path d="M 780 200 L 680 270" class="relation-line" />
+  <circle cx="780" cy="200" r="4" fill="#2563eb" />
+  <polygon points="680,270 690,265 688,275" fill="#2563eb" />
+  <text x="710" y="225" class="relation-label">1 : N (attends)</text>
+
+  <!-- Patient to Medical Record: 1 to N -->
+  <path d="M 190 290 L 190 520" class="relation-line" />
+  <circle cx="190" cy="290" r="4" fill="#2563eb" />
+  <polygon points="190,520 185,510 195,510" fill="#2563eb" />
+  <text x="120" y="380" class="relation-label">1 : N (possesses)</text>
+
+  <!-- Appointment to Medical Record: 1 to N -->
+  <path d="M 450 440 L 380 520" class="relation-line" />
+  <circle cx="450" cy="440" r="4" fill="#2563eb" />
+  <polygon points="380,520 382,510 392,515" fill="#2563eb" />
+  <text x="400" y="475" class="relation-label">1 : N</text>
+
+  <!-- Patient to Billing: 1 to N -->
+  <path d="M 280 290 Q 320 480 680 570" class="relation-line" stroke-dasharray="4,4" />
+  <circle cx="280" cy="290" r="4" fill="#2563eb" />
+  <polygon points="680,570 670,565 672,575" fill="#2563eb" />
+  <text x="480" y="495" class="relation-label">1 : N (billed_to)</text>
+
+  <!-- Appointment to Billing: 1 to N -->
+  <path d="M 640 440 L 720 520" class="relation-line" />
+  <circle cx="640" cy="440" r="4" fill="#2563eb" />
+  <polygon points="720,520 710,515 718,508" fill="#2563eb" />
+  <text x="670" y="475" class="relation-label">1 : N (generates)</text>
+
+  <!-- Doctor to Medical Record: 1 to N -->
+  <path d="M 850 290 Q 750 430 420 560" class="relation-line" stroke-dasharray="4,4" />
+  <circle cx="850" cy="290" r="4" fill="#2563eb" />
+  <polygon points="420,560 430,555 428,565" fill="#2563eb" />
+  <text x="610" y="440" class="relation-label">1 : N (authors)</text>
+
+  <!-- ==================== LEGEND ==================== -->
+  <g transform="translate(60, 780)">
+    <rect width="980" height="40" fill="#f8fafc" stroke="#e2e8f0" rx="6" />
+    <text x="20" y="25" class="col-pk">🔑 Primary Key (PK)</text>
+    <text x="200" y="25" class="col-fk">🔗 Foreign Key (FK)</text>
+    <text x="380" y="25" class="legend-text">Solid Line: Direct Relationship</text>
+    <text x="600" y="25" class="legend-text">Dashed Line: Indirect Referential Constraint</text>
+    <text x="830" y="25" class="legend-text">Referential Rule: ON DELETE RESTRICT</text>
+  </g>
+</svg>
+

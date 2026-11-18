@@ -1,0 +1,66 @@
+erDiagram
+    PATIENT ||--o{ APPOINTMENT : "books"
+    DOCTOR ||--o{ APPOINTMENT : "attends"
+    PATIENT ||--o{ MEDICAL_RECORD : "possesses"
+    DOCTOR ||--o{ MEDICAL_RECORD : "authors"
+    APPOINTMENT ||--o{ MEDICAL_RECORD : "generates"
+    PATIENT ||--o{ BILLING : "incurred_by"
+    APPOINTMENT ||--o{ BILLING : "billed_for"
+
+    PATIENT {
+        int patient_id PK "Auto Increment"
+        string name "Patient Full Name"
+        string gender "Gender (Male/Female/Other)"
+        date dob "Date of Birth"
+        string phone "Contact Number"
+        string address "Residential Address"
+    }
+
+    DOCTOR {
+        int doctor_id PK "Auto Increment"
+        string name "Doctor Full Name"
+        string specialization "Clinical Specialty"
+        string phone "Phone Number"
+        string email "Official Email"
+        string department "Hospital Department"
+    }
+
+    APPOINTMENT {
+        int appointment_id PK "Auto Increment"
+        int patient_id FK "References PATIENT(patient_id)"
+        int doctor_id FK "References DOCTOR(doctor_id)"
+        date appointment_date "Scheduled Date"
+        string time_slot "Time Interval"
+        string status "Scheduled / Completed / Cancelled"
+    }
+
+    MEDICAL_RECORD {
+        int record_id PK "Auto Increment"
+        int patient_id FK "References PATIENT(patient_id)"
+        int doctor_id FK "References DOCTOR(doctor_id)"
+        int appointment_id FK "References APPOINTMENT(appointment_id)"
+        text diagnosis "Clinical Diagnosis"
+        text prescription "Medications & Dosage"
+        text report "Diagnostic Observations"
+        date record_date "Documentation Date"
+    }
+
+    BILLING {
+        int bill_id PK "Auto Increment"
+        int patient_id FK "References PATIENT(patient_id)"
+        int appointment_id FK "References APPOINTMENT(appointment_id)"
+        decimal amount "Billed Amount (INR)"
+        string payment_status "Paid / Pending / Partially Paid"
+        text insurance_details "Insurance / Claim Notes"
+        date bill_date "Invoice Generation Date"
+    }
+
+    USERS {
+        int user_id PK "Auto Increment"
+        string name "User Full Name"
+        string email UK "Login Email (Unique)"
+        string password_hash "Cryptographic scrypt hash"
+        string role "Administrator / Staff"
+        timestamp created_at "Account Creation Timestamp"
+    }
+

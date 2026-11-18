@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Medical Records - CarePoint{% endblock %}
+{% block page_title %}Medical & Clinical Records{% endblock %}
+{% block breadcrumb %}Patient Records & Diagnoses{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            Clinical Records Directory
+        </span>
+        <a href="{{ url_for('medical_record_add') }}" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            New Clinical Record
+        </a>
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div style="padding: 1.25rem 1.5rem; background: #fafafa; border-bottom: 1px solid var(--border-color);">
+        <form method="GET" action="{{ url_for('medical_records_list') }}" style="display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center;">
+            <div style="flex: 1; min-width: 200px;">
+                <input type="text" name="q" class="form-control" placeholder="Search by patient name or diagnosis..." value="{{ filters.q or '' }}">
+            </div>
+
+            <div style="min-width: 170px;">
+                <select name="doctor_id" class="form-control">
+                    <option value="">All Doctors</option>
+                    {% for doc in doctors %}
+                        <option value="{{ doc.doctor_id }}" {% if filters.doctor_id|string == doc.doctor_id|string %}selected{% endif %}>
+                            {{ doc.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="min-width: 150px;">
+                <input type="date" name="date" class="form-control" value="{{ filters.date or '' }}">
+            </div>
+
+            <button type="submit" class="btn btn-secondary">Filter</button>
+            {% if filters.q or filters.doctor_id or filters.date %}
+                <a href="{{ url_for('medical_records_list') }}" class="btn btn-secondary">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="card-body" style="padding: 0;">
+        {% if records %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Rec ID</th>
+                            <th>Date</th>
+                            <th>Patient Name</th>
+                            <th>Attending Doctor</th>
+                            <th>Appt #</th>
+                            <th>Diagnosis Summary</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in records %}
+                            <tr>
+                                <td><strong>#{{ r.record_id }}</strong></td>
+                                <td>{{ r.record_date }}</td>
+                                <td>
+                                    <a href="{{ url_for('patient_detail', patient_id=r.patient_id) }}" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                                        {{ r.patient_name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('doctor_detail', doctor_id=r.doctor_id) }}" style="color: var(--text-dark); text-decoration: none;">
+                                        {{ r.doctor_name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('appointment_detail', appointment_id=r.appointment_id) }}" class="badge badge-secondary" style="text-decoration: none;">
+                                        #{{ r.appointment_id }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <span style="font-weight: 500;">{{ r.diagnosis or 'Consultation' }}</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <div class="btn-group">
+                                        <a href="{{ url_for('medical_record_detail', record_id=r.record_id) }}" class="btn btn-secondary btn-sm" title="View Full Chart">
+                                            View
+                                        </a>
+                                        <a href="{{ url_for('medical_record_edit', record_id=r.record_id) }}" class="btn btn-secondary btn-sm" title="Edit Medical Record">
+                                            Edit
+                                        </a>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ url_for('medical_record_delete', record_id=r.record_id) }}', 'Medical Record', '#{{ r.record_id }} ({{ r.patient_name }})')" title="Delete Record">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                <div class="empty-title">No medical records found</div>
+                <div class="empty-desc">No clinical records match the specified search or filter criteria.</div>
+                {% if filters.q or filters.doctor_id or filters.date %}
+                    <a href="{{ url_for('medical_records_list') }}" class="btn btn-secondary btn-sm">Clear Filters</a>
+                {% else %}
+                    <a href="{{ url_for('medical_record_add') }}" class="btn btn-primary btn-sm">Add First Clinical Record</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Management - CarePoint{% endblock %}
+{% block page_title %}Doctor Directory{% endblock %}
+{% block breadcrumb %}Medical Staff & Doctors{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="filter-bar" style="margin-bottom: 0; width: 100%;">
+            <form method="GET" action="{{ url_for('doctors_list') }}" class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" name="q" class="form-control" placeholder="Search by name, spec, or department..." value="{{ search_query or '' }}">
+                {% if search_query %}
+                    <a href="{{ url_for('doctors_list') }}" style="position: absolute; right: 0.75rem; color: #94a3b8; text-decoration: none; font-weight: bold;">&times;</a>
+                {% endif %}
+            </form>
+
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <span style="font-size: 0.85rem; color: var(--text-muted);">
+                    Showing <strong>{{ doctors|length }}</strong> doctor(s)
+                </span>
+                <a href="{{ url_for('doctor_add') }}" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add New Doctor
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body" style="padding: 0;">
+        {% if doctors %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Doctor Name</th>
+                            <th>Specialization</th>
+                            <th>Department</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Appointments</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in doctors %}
+                            <tr>
+                                <td><strong>#{{ d.doctor_id }}</strong></td>
+                                <td>
+                                    <a href="{{ url_for('doctor_detail', doctor_id=d.doctor_id) }}" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                                        {{ d.name }}
+                                    </a>
+                                </td>
+                                <td>{{ d.specialization or '&mdash;'|safe }}</td>
+                                <td>
+                                    <span class="badge badge-secondary">{{ d.department or 'General' }}</span>
+                                </td>
+                                <td>{{ d.phone or '&mdash;'|safe }}</td>
+                                <td>{{ d.email or '&mdash;'|safe }}</td>
+                                <td>
+                                    <span class="badge badge-scheduled">{{ d.appt_count if d.appt_count is defined else 0 }} booked</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <div class="btn-group">
+                                        <a href="{{ url_for('doctor_detail', doctor_id=d.doctor_id) }}" class="btn btn-secondary btn-sm" title="View Doctor Profile">
+                                            View
+                                        </a>
+                                        <a href="{{ url_for('doctor_edit', doctor_id=d.doctor_id) }}" class="btn btn-secondary btn-sm" title="Edit Doctor Profile">
+                                            Edit
+                                        </a>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ url_for('doctor_delete', doctor_id=d.doctor_id) }}', 'Doctor', '{{ d.name }}')" title="Delete Doctor">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
+                <div class="empty-title">No doctors found</div>
+                <div class="empty-desc">
+                    {% if search_query %}
+                        No doctor records matched "{{ search_query }}".
+                    {% else %}
+                        There are currently no doctor records in the database.
+                    {% endif %}
+                </div>
+                {% if search_query %}
+                    <a href="{{ url_for('doctors_list') }}" class="btn btn-secondary btn-sm">Clear Search</a>
+                {% else %}
+                    <a href="{{ url_for('doctor_add') }}" class="btn btn-primary btn-sm">Add First Doctor</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

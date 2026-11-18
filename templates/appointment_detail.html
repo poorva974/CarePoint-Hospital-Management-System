@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Appointment #{{ appointment.appointment_id }} - CarePoint{% endblock %}
+{% block page_title %}Appointment Details #{{ appointment.appointment_id }}{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('appointments_list') }}" style="color: inherit; text-decoration: none;">Appointments</a> &rsaquo; Detail #{{ appointment.appointment_id }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Consultation Booking #{{ appointment.appointment_id }}
+        </span>
+        <div class="btn-group">
+            <a href="{{ url_for('appointment_edit', appointment_id=appointment.appointment_id) }}" class="btn btn-secondary btn-sm">Edit</a>
+            <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ url_for('appointment_delete', appointment_id=appointment.appointment_id) }}', 'Appointment', '#{{ appointment.appointment_id }}')">Delete</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="detail-grid">
+            <div class="detail-item">
+                <dt>Appointment ID</dt>
+                <dd>#{{ appointment.appointment_id }}</dd>
+            </div>
+            <div class="detail-item">
+                <dt>Date & Time</dt>
+                <dd>{{ appointment.appointment_date }} at {{ appointment.time_slot }}</dd>
+            </div>
+            <div class="detail-item">
+                <dt>Status</dt>
+                <dd>
+                    {% if appointment.status == 'Scheduled' %}
+                        <span class="badge badge-scheduled"><span class="badge-dot"></span>Scheduled</span>
+                    {% elif appointment.status == 'Completed' %}
+                        <span class="badge badge-completed"><span class="badge-dot"></span>Completed</span>
+                    {% elif appointment.status == 'Cancelled' %}
+                        <span class="badge badge-cancelled"><span class="badge-dot"></span>Cancelled</span>
+                    {% else %}
+                        <span class="badge badge-secondary">{{ appointment.status }}</span>
+                    {% endif %}
+                </dd>
+            </div>
+            <div class="detail-item">
+                <dt>Patient</dt>
+                <dd>
+                    <a href="{{ url_for('patient_detail', patient_id=appointment.patient_id) }}" style="color: var(--primary); text-decoration: none; font-weight: 700;">
+                        {{ appointment.patient_name }}
+                    </a>
+                    {% if appointment.patient_phone %}
+                        <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: normal;">Phone: {{ appointment.patient_phone }}</div>
+                    {% endif %}
+                </dd>
+            </div>
+            <div class="detail-item">
+                <dt>Doctor</dt>
+                <dd>
+                    <a href="{{ url_for('doctor_detail', doctor_id=appointment.doctor_id) }}" style="color: var(--text-dark); text-decoration: none; font-weight: 700;">
+                        {{ appointment.doctor_name }}
+                    </a>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: normal;">{{ appointment.doctor_specialization or 'General' }} ({{ appointment.department or 'General' }})</div>
+                </dd>
+            </div>
+        </div>
+
+        <!-- Quick Status Update Forms -->
+        {% if appointment.status == 'Scheduled' %}
+            <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color);">
+                <form method="POST" action="{{ url_for('appointment_status_update', appointment_id=appointment.appointment_id) }}" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="status" value="Completed">
+                    <button type="submit" class="btn btn-success btn-sm">Mark as Completed</button>
+                </form>
+                <form method="POST" action="{{ url_for('appointment_status_update', appointment_id=appointment.appointment_id) }}" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="status" value="Cancelled">
+                    <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--danger);">Cancel Appointment</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Linked Clinical & Billing Records -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+    <!-- Linked Medical Record -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                Linked Medical Record
+            </span>
+            {% if not medical_record %}
+                <a href="{{ url_for('medical_record_add', appointment_id=appointment.appointment_id) }}" class="btn btn-primary btn-sm">+ Create Record</a>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if medical_record %}
+                <div class="clinical-box">
+                    <h4>Diagnosis</h4>
+                    <p>{{ medical_record.diagnosis or 'No diagnosis noted.' }}</p>
+                </div>
+                <div class="clinical-box">
+                    <h4>Prescription</h4>
+                    <p>{{ medical_record.prescription or 'No prescription entered.' }}</p>
+                </div>
+                <div class="clinical-box">
+                    <h4>Lab / Clinical Report</h4>
+                    <p>{{ medical_record.report or 'No report entered.' }}</p>
+                </div>
+                <div style="text-align: right; margin-top: 0.75rem;">
+                    <a href="{{ url_for('medical_record_detail', record_id=medical_record.record_id) }}" class="btn btn-secondary btn-sm">View Full Record &rarr;</a>
+                </div>
+            {% else %}
+                <div class="empty-state" style="padding: 1.5rem;">
+                    <div class="empty-desc">No medical record has been recorded for this appointment yet.</div>
+                    <a href="{{ url_for('medical_record_add', appointment_id=appointment.appointment_id) }}" class="btn btn-secondary btn-sm">Add Medical Record</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Linked Billing Invoice -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                Linked Billing Invoice
+            </span>
+            {% if not bill %}
+                <a href="{{ url_for('billing_add', appointment_id=appointment.appointment_id) }}" class="btn btn-primary btn-sm">+ Generate Bill</a>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if bill %}
+                <div class="detail-grid" style="margin-bottom: 1rem;">
+                    <div class="detail-item">
+                        <dt>Invoice #</dt>
+                        <dd>#{{ bill.bill_id }}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt>Amount</dt>
+                        <dd><strong style="font-size: 1.25rem; color: var(--primary);">₹{{ "{:,.2f}".format(bill.amount) }}</strong></dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt>Payment Status</dt>
+                        <dd>
+                            {% if bill.payment_status == 'Paid' %}
+                                <span class="badge badge-paid">Paid</span>
+                            {% elif bill.payment_status == 'Pending' %}
+                                <span class="badge badge-pending">Pending</span>
+                            {% elif bill.payment_status == 'Partially Paid' %}
+                                <span class="badge badge-partially-paid">Partially Paid</span>
+                            {% else %}
+                                <span class="badge badge-secondary">{{ bill.payment_status }}</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt>Bill Date</dt>
+                        <dd>{{ bill.bill_date }}</dd>
+                    </div>
+                </div>
+                {% if bill.insurance_details %}
+                    <div class="clinical-box">
+                        <h4>Insurance Details</h4>
+                        <p>{{ bill.insurance_details }}</p>
+                    </div>
+                {% endif %}
+                <div style="text-align: right; margin-top: 0.75rem;">
+                    <a href="{{ url_for('billing_detail', bill_id=bill.bill_id) }}" class="btn btn-secondary btn-sm">View Printable Receipt &rarr;</a>
+                </div>
+            {% else %}
+                <div class="empty-state" style="padding: 1.5rem;">
+                    <div class="empty-desc">No bill has been generated for this appointment yet.</div>
+                    <a href="{{ url_for('billing_add', appointment_id=appointment.appointment_id) }}" class="btn btn-secondary btn-sm">Generate Bill</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
